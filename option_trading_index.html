@@ -935,6 +935,27 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--secondary-text);
         }
+
+        /* Exit Countdown Modal Specific Styles */
+        #exit-countdown-dialog {
+            animation: pulse 1.5s infinite alternate;
+            border: 2px solid var(--warning-color);
+        }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            to { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+
+        #exit-countdown-progress {
+            transition: width 1s linear;
+        }
+
+        #exit-countdown-timer {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: color 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -1347,6 +1368,62 @@
             </button>
         </div>
     </div>
+
+    <!-- Exit Countdown Modal (Webpage Only) - NEW -->
+    <div class="overlay" id="exit-countdown-overlay"></div>
+    <div class="confirmation-dialog" id="exit-countdown-dialog">
+        <div style="text-align: center;">
+            <!-- Dynamic icon based on exit type -->
+            <div id="exit-countdown-icon" style="font-size: 3rem; margin-bottom: 15px;">
+                <i class="fas fa-hourglass-half" style="color: #f59e0b;"></i>
+            </div>
+            
+            <h3 id="exit-countdown-title" style="margin-bottom: 10px; color: var(--text-color);">
+                ⚠️ Exit Countdown Started
+            </h3>
+            
+            <div id="exit-countdown-message" style="margin-bottom: 15px; color: var(--text-color); padding: 10px; background: rgba(241, 245, 249, 0.5); border-radius: 6px;">
+                <!-- Message will be inserted here -->
+            </div>
+            
+            <!-- Countdown Timer -->
+            <div style="margin: 20px 0;">
+                <div style="font-size: 2.8rem; font-weight: bold; color: var(--danger-color);" id="exit-countdown-timer">
+                    7
+                </div>
+                <div style="color: var(--secondary-text); margin-top: 5px;">
+                    Seconds remaining
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin: 15px 0;">
+                <div id="exit-countdown-progress" style="width: 100%; height: 100%; background: var(--danger-color); transition: width 1s linear;"></div>
+            </div>
+            
+            <!-- Details -->
+            <div style="text-align: left; background: rgba(241, 245, 249, 0.5); padding: 12px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--warning-color);">
+                <div style="margin-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span style="font-weight: 600;">Exit will execute in <span id="exit-countdown-seconds">7</span> seconds</span>
+                </div>
+                <div style="font-size: 0.9rem; color: var(--secondary-text);">
+                    Click "Cancel Exit" below to stop the countdown
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-danger" onclick="cancelExitCountdown()" style="flex: 1; font-size: 1.1rem; padding: 12px;">
+                    <i class="fas fa-times-circle"></i> Cancel Exit
+                </button>
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 0.8rem; color: var(--secondary-text);">
+                <i class="fas fa-exclamation-triangle"></i> If not cancelled, all positions will be closed automatically
+            </div>
+        </div>
+    </div>
     
     <!-- Notification -->
     <div class="notification" id="notification"></div>
@@ -1371,6 +1448,11 @@
         // New variable for BTC to USD conversion
         const BTC_TO_USD_RATE = 0.85; // 1 dollar = 0.85 BTC (adjust as needed)
         
+        // Exit countdown variables
+        let exitCountdownInterval = null;
+        let exitCountdownSeconds = 7;
+        let exitCheckInterval = null;
+
         // Initialize page
         $(document).ready(function() {
             const today = new Date();
@@ -1407,7 +1489,154 @@
                     $('#type-puts').prop('checked', true);
                 }
             });
+
+            // Start checking for exit countdown
+            startExitCountdownCheck();
+
+            // Also check when page becomes visible again
+            $(window).on('focus', function() {
+                checkExitCountdown();
+            });
+
+            // Check more frequently when modal is visible
+            setInterval(function() {
+                if ($('#exit-countdown-dialog').css('display') !== 'none') {
+                    checkExitCountdown();
+                }
+            }, 500);
         });
+        
+        // ============ EXIT COUNTDOWN FUNCTIONS ============
+
+        // Check for exit countdown every second
+        function startExitCountdownCheck() {
+            if (exitCheckInterval) {
+                clearInterval(exitCheckInterval);
+            }
+            
+            exitCheckInterval = setInterval(function() {
+                checkExitCountdown();
+            }, 1000);
+        }
+
+        function checkExitCountdown() {
+            $.get('/get_exit_countdown_status', function(response) {
+                if (response.success && response.active && !response.cancelled) {
+                    showExitCountdown(response);
+                } else {
+                    hideExitCountdown();
+                }
+            }).fail(function() {
+                console.log("Failed to check exit countdown status");
+            });
+        }
+
+        function showExitCountdown(data) {
+            const pendingExit = data.pending_exit;
+            const remaining = data.remaining_seconds || 7;
+            const currentBtcPrice = data.current_btc_price || 0;
+            
+            // Update seconds
+            exitCountdownSeconds = remaining;
+            
+            // Update timer display
+            $('#exit-countdown-timer').text(exitCountdownSeconds);
+            $('#exit-countdown-seconds').text(exitCountdownSeconds);
+            
+            // Update progress bar
+            const progressPercent = (exitCountdownSeconds / 7) * 100;
+            $('#exit-countdown-progress').css('width', progressPercent + '%');
+            
+            // Update title and icon based on exit type
+            if (pendingExit.exit_type === 'sl') {
+                $('#exit-countdown-icon').html('<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>');
+                $('#exit-countdown-title').html('🔴 STOP LOSS COUNTDOWN');
+                $('#exit-countdown-title').css('color', '#ef4444');
+            } else if (pendingExit.exit_type === 'target') {
+                $('#exit-countdown-icon').html('<i class="fas fa-bullseye" style="color: #10b981;"></i>');
+                $('#exit-countdown-title').html('🟢 TARGET COUNTDOWN');
+                $('#exit-countdown-title').css('color', '#10b981');
+            } else {
+                $('#exit-countdown-icon').html('<i class="fas fa-hourglass-half" style="color: #f59e0b;"></i>');
+                $('#exit-countdown-title').html('⚠️ EXIT COUNTDOWN');
+                $('#exit-countdown-title').css('color', '#f59e0b');
+            }
+            
+            // Update message
+            const levelText = pendingExit.level === 'above' ? 'Above' : 'Below';
+            const typeText = pendingExit.exit_type === 'sl' ? 'Stop Loss' : pendingExit.exit_type === 'target' ? 'Target' : 'Exit';
+            
+            $('#exit-countdown-message').html(`
+                <div style="margin-bottom: 5px;"><b>${typeText} Level:</b> ${levelText} $${pendingExit.trigger_price}</div>
+                <div style="margin-bottom: 5px;"><b>Current BTC:</b> $${currentBtcPrice.toFixed(2)}</div>
+                <div style="font-size: 0.9em; color: var(--secondary-text);">${pendingExit.trigger_reason || ''}</div>
+            `);
+            
+            // Show modal if not already shown
+            if ($('#exit-countdown-dialog').css('display') === 'none') {
+                $('#exit-countdown-overlay, #exit-countdown-dialog').show();
+                
+                // Start countdown interval
+                if (exitCountdownInterval) {
+                    clearInterval(exitCountdownInterval);
+                }
+                
+                exitCountdownInterval = setInterval(function() {
+                    exitCountdownSeconds--;
+                    
+                    if (exitCountdownSeconds <= 0) {
+                        clearInterval(exitCountdownInterval);
+                        hideExitCountdown();
+                        
+                        // Show execution notification
+                        showNotification('Exit executed! All positions closed.', 'success');
+                        
+                        // Refresh recent trades
+                        loadRecentTrades();
+                    } else {
+                        $('#exit-countdown-timer').text(exitCountdownSeconds);
+                        $('#exit-countdown-seconds').text(exitCountdownSeconds);
+                        
+                        // Update progress bar
+                        const progressPercent = (exitCountdownSeconds / 7) * 100;
+                        $('#exit-countdown-progress').css('width', progressPercent + '%');
+                        
+                        // Change color when 3 seconds left
+                        if (exitCountdownSeconds <= 3) {
+                            $('#exit-countdown-timer').css('color', '#dc2626');
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function hideExitCountdown() {
+            $('#exit-countdown-overlay, #exit-countdown-dialog').hide();
+            
+            if (exitCountdownInterval) {
+                clearInterval(exitCountdownInterval);
+                exitCountdownInterval = null;
+            }
+            
+            exitCountdownSeconds = 7;
+        }
+
+        function cancelExitCountdown() {
+            $.post('/cancel_exit_countdown', function(response) {
+                if (response.success) {
+                    hideExitCountdown();
+                    showNotification('Exit cancelled! Positions remain open.', 'warning');
+                    logMessage('Exit countdown cancelled by user', 'warning');
+                    
+                    // Clear the progress bar
+                    $('#exit-countdown-progress').css('width', '100%');
+                } else {
+                    showNotification('Failed to cancel exit: ' + (response.error || 'Unknown error'), 'error');
+                }
+            }).fail(function() {
+                showNotification('Error: Could not cancel exit countdown', 'error');
+            });
+        }
         
         // Function to toggle selection mode
         function toggleSelectionMode() {
@@ -1553,6 +1782,9 @@
                     }
                 }
             });
+
+            // Also check for active countdown
+            checkExitCountdown();
         }
         
         function updateExitDisplay(levels) {

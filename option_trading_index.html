@@ -1,0 +1,3325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delta Exchange Option Trading</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --header-bg: #ffffff;
+            --header-border: #e2e8f0;
+            --text-color: #1e293b;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e2e8f0;
+            --secondary-text: #64748b;
+            --hover-bg: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        /* Professional Header Styling */
+        .main-header {
+            background: var(--header-bg);
+            border-bottom: 2px solid var(--header-border);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0;
+        }
+        
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+        }
+        
+        /* Logo and Title Section */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-color), #1d4ed8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .site-title {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .site-title h1 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+        
+        .site-title .tagline {
+            font-size: 0.9rem;
+            color: var(--secondary-text);
+            margin-top: 3px;
+            font-weight: 400;
+        }
+        
+        /* Header Info Section */
+        .header-info {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        /* Price Info Card */
+        .price-info-card {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 20px;
+            min-width: 280px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        .price-info-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .price-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .price-label {
+            color: var(--secondary-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .price-value {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--text-color);
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .price-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .change-up {
+            color: var(--success-color);
+        }
+        
+        .change-down {
+            color: var(--danger-color);
+        }
+        
+        .change-icon {
+            font-size: 0.7rem;
+        }
+        
+        /* IP Info Card */
+        .ip-info-card {
+            background: linear-gradient(135deg, #f8fafc, #ffffff);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 20px;
+            min-width: 280px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        .ip-info-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .ip-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .ip-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .ip-label {
+            color: var(--secondary-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .ip-value {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-color);
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .verified-true { 
+            color: var(--success-color) !important;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .verified-false { 
+            color: var(--danger-color) !important;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .verified-checking { 
+            color: var(--warning-color) !important;
+            background: rgba(245, 158, 11, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        /* Main Content Container */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 30px;
+        }
+        
+        /* Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+                align-items: stretch;
+            }
+            
+            .logo-section {
+                justify-content: center;
+                text-align: center;
+            }
+            
+            .header-info {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 15px 20px;
+            }
+            
+            .container {
+                padding: 0 20px;
+            }
+            
+            .header-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .price-info-card,
+            .ip-info-card {
+                min-width: 100%;
+            }
+            
+            .site-title h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Panel Styling */
+        .panel {
+            background: var(--header-bg);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        .panel:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .panel-header h2 {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .status-active { 
+            background: linear-gradient(135deg, var(--success-color), #059669);
+        }
+        
+        .status-inactive { 
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+        
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Button Styling */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color), #2563eb);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-color);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* Options List */
+        .options-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .option-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        
+        .option-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .option-symbol {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+        
+        .option-type {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .type-call { 
+            background: rgba(59, 130, 246, 0.1); 
+            color: var(--accent-color);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .type-put { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .option-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        /* Log Container */
+        .log-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .log-entry {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .log-success { color: var(--success-color); }
+        .log-error { color: var(--danger-color); }
+        .log-warning { color: var(--warning-color); }
+        .log-info { color: var(--accent-color); }
+        
+        /* Notifications and Dialogs */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: var(--header-bg);
+            border-left: 4px solid var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--header-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            display: none;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+        }
+        
+        /* Section Specific Styling */
+        .current-levels div {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 6px;
+            background: rgba(241, 245, 249, 0.5);
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        .current-levels div span {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        .type-sl {
+            color: var(--danger-color) !important;
+        }
+        
+        .type-target {
+            color: var(--success-color) !important;
+        }
+        
+        /* Recent Trades Styling */
+        .trades-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .trade-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        
+        .trade-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .trade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .trade-symbol {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-color);
+        }
+        
+        .trade-side {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .side-buy { 
+            background: rgba(16, 185, 129, 0.1); 
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .side-sell { 
+            background: rgba(239, 68, 68, 0.1); 
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .trade-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .trade-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .trade-detail-label {
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+        }
+        
+        .trade-detail-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .trade-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+        
+        .trade-time {
+            color: var(--secondary-text);
+        }
+        
+        .trade-type {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-color);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Tracking Status Styling */
+        .tracking-status-container {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .tracking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .tracking-details {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+        
+        .tracking-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .tracking-detail-label {
+            color: var(--secondary-text);
+            font-weight: 500;
+        }
+        
+        .tracking-detail-value {
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .profit-positive {
+            color: var(--success-color);
+        }
+        
+        .profit-negative {
+            color: var(--danger-color);
+        }
+        
+        /* Archive Modal */
+        .archive-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--header-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            z-index: 1002;
+            display: none;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .archive-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .archive-header h3 {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        .archive-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .archive-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            justify-content: flex-end;
+        }
+        
+        /* Projected P&L Styling */
+        .projected-pnl {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(241, 245, 249, 0.7), rgba(241, 245, 249, 0.9));
+            border: 1px dashed var(--border-color);
+        }
+        
+        .projected-pnl-header {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .projected-level {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            background: white;
+            border-left: 3px solid var(--border-color);
+        }
+        
+        .projected-level.target {
+            border-left-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .projected-level.sl {
+            border-left-color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .level-type {
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .level-type.target {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .level-type.sl {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .projected-details {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .projected-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        
+        .projected-label {
+            color: var(--secondary-text);
+        }
+        
+        .projected-value {
+            font-weight: 600;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .pnl-positive {
+            color: var(--success-color);
+        }
+        
+        .pnl-negative {
+            color: var(--danger-color);
+        }
+        
+        /* Pending Orders Styling */
+        .pending-order {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pending-order:hover {
+            border-color: var(--accent-color);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--hover-bg);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-text);
+        }
+    </style>
+</head>
+<body>
+    <!-- Professional Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="site-title">
+                    <h1>Delta Exchange Option Trading</h1>
+                    <span class="tagline">Professional Options Trading Platform</span>
+                </div>
+            </div>
+            
+            <div class="header-info">
+                <!-- Price Info Card -->
+                <div class="price-info-card">
+                    <div class="price-row">
+                        <span class="price-label">BTC Price</span>
+                        <span class="price-value" id="btc-price">Loading...</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="price-label">24h Change</span>
+                        <div class="price-change" id="price-change-container">
+                            <span id="price-change-amount">0.00</span>
+                            <span id="price-change-percent">(0.00%)</span>
+                            <i class="fas fa-arrow-up change-icon" id="price-change-icon" style="display: none;"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- IP Info Card -->
+                <div class="ip-info-card">
+                    <div class="ip-row">
+                        <span class="ip-label">IP Address</span>
+                        <span class="ip-value" id="current-ip-display">Loading...</span>
+                    </div>
+                    <div class="ip-row">
+                        <span class="ip-label">IP Verified</span>
+                        <span id="ip-verified-text" class="ip-value verified-checking">Checking...</span>
+                    </div>
+                </div>
+                
+                <!-- Navigation buttons -->
+                <div style="display: flex; gap: 10px; margin-left: 20px;">
+                    <a href="/" class="btn btn-primary" style="text-decoration: none; padding: 8px 16px;">
+                        <i class="fas fa-chart-line"></i> Trading
+                    </a>
+                    <a href="/screener" class="btn btn-outline" style="text-decoration: none; padding: 8px 16px;">
+                        <i class="fas fa-search"></i> Screener
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="layout">
+            <!-- Left Column -->
+            <div class="left-column">
+                <!-- Index Based Exit Panel -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-door-exit"></i> Index Based Exit</h2>
+                        <span id="exit-status" class="status-badge status-inactive">Not Active</span>
+                    </div>
+                    <p style="margin-bottom: 20px; color: var(--secondary-text);">
+                        Automatically exit positions when BTC price crosses these levels
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="exit-above"><i class="fas fa-arrow-up"></i> Exit Above Price</label>
+                        <input type="number" id="exit-above" step="0.01" placeholder="e.g., 70000">
+                        
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.9rem; color: var(--secondary-text);">Set as:</span>
+                            <div style="display: flex; gap: 15px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="above-type" value="" checked> None
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="above-type" value="sl"> Stop Loss
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="above-type" value="target"> Target
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="exit-below"><i class="fas fa-arrow-down"></i> Exit Below Price</label>
+                        <input type="number" id="exit-below" step="0.01" placeholder="e.g., 65000">
+                        
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.9rem; color: var(--secondary-text);">Set as:</span>
+                            <div style="display: flex; gap: 15px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="below-type" value="" checked> None
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="below-type" value="sl"> Stop Loss
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="radio" name="below-type" value="target"> Target
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="setExitLevels()">
+                            <i class="fas fa-save"></i> Set Levels
+                        </button>
+                        <button class="btn btn-danger" onclick="clearExitLevels()">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                    
+                    <div class="current-levels" style="margin-top: 20px; padding: 15px; background: rgba(241, 245, 249, 0.5); border-radius: 8px;">
+                        <h3 style="margin-bottom: 10px; font-size: 1rem; font-weight: 600;">Current Levels:</h3>
+                        <div id="current-levels-display">
+                            <div>Exit Above: <span id="current-above" style="font-weight: 600;">Not Set</span></div>
+                            <div>Exit Below: <span id="current-below" style="font-weight: 600;">Not Set</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Option Greeks Calculator -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-calculator"></i> Greeks Calculator</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="option-symbol"><i class="fas fa-tag"></i> Option Symbol</label>
+                        <input type="text" id="option-symbol" placeholder="C-BTC-119600-280725">
+                        <div class="btn-group" style="margin-top: 10px;">
+                            <button class="btn btn-primary" onclick="fetchGreeks()" style="width: 100%;">
+                                <i class="fas fa-download"></i> Fetch Greeks
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="greeks-results" style="display: none;">
+                        <h3 style="margin: 20px 0 10px 0; font-weight: 600;">Option Details</h3>
+                        <div class="option-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Mark Price</span>
+                                <span class="detail-value" id="greek-price">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Delta</span>
+                                <span class="detail-value" id="greek-delta">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Gamma</span>
+                                <span class="detail-value" id="greek-gamma">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Theta</span>
+                                <span class="detail-value" id="greek-theta">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Vega</span>
+                                <span class="detail-value" id="greek-vega">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Rho</span>
+                                <span class="detail-value" id="greek-rho">-</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label for="target-price"><i class="fas fa-bullseye"></i> Target BTC Price</label>
+                            <input type="number" id="target-price" step="0.01" placeholder="Target BTC price">
+                            <button class="btn btn-success" onclick="calculateTarget()" style="margin-top: 10px; width: 100%;">
+                                <i class="fas fa-chart-line"></i> Estimate Option Price
+                            </button>
+                        </div>
+                        
+                        <div id="target-result" style="display: none; padding: 15px; background: rgba(241, 245, 249, 0.5); border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; font-weight: 600;">Estimation Result</h4>
+                            <div style="margin-top: 10px;">
+                                Estimated Option Price: <span id="estimated-price" style="font-weight: 600;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="right-column">
+                <!-- Find & Trade Options -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-search-dollar"></i> Find & Trade Options</h2>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expiry-date"><i class="fas fa-calendar-alt"></i> Expiry Date</label>
+                        <input type="date" id="expiry-date">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-filter"></i> Option Type</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="type-calls" name="option-type" value="Calls" checked>
+                                <label for="type-calls">Calls Only</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="type-puts" name="option-type" value="Puts">
+                                <label for="type-puts">Puts Only</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="type-straddle" name="option-type" value="Straddle">
+                                <label for="type-straddle">Straddle</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NEW: Selection Mode Section -->
+                    <div class="form-group">
+                        <label><i class="fas fa-cogs"></i> Selection Mode</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="mode-auto" name="selection-mode" value="auto" checked>
+                                <label for="mode-auto">Auto Find (Delta based)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="mode-manual" name="selection-mode" value="manual">
+                                <label for="mode-manual">Manual Strike Selection</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Symbol Input (Initially Hidden) -->
+                    <div id="manual-symbol-section" style="display: none;">
+                        <div class="form-group">
+                            <label for="manual-symbol"><i class="fas fa-tag"></i> Option Symbol</label>
+                            <input type="text" id="manual-symbol" placeholder="e.g., C-BTC-93000-200126" style="font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;">
+                            <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                                Format: C/P-BTC-Strike-Expiry (e.g., C-BTC-93000-200126 for Call)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-exchange-alt"></i> Action</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="action-buy" name="action" value="buy" checked>
+                                <label for="action-buy">Buy</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="action-sell" name="action" value="sell">
+                                <label for="action-sell">Sell</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="quantity"><i class="fas fa-boxes"></i> Quantity</label>
+                        <input type="number" id="quantity" value="1" min="1">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="findOptions()" style="width: 100%;">
+                        <i class="fas fa-search"></i> Find Options
+                    </button>
+                    
+                    <div id="options-container" class="options-list"></div>
+                    
+                    <!-- Trigger Order Section -->
+                    <div class="trigger-section" id="trigger-section" style="display: none; margin-top: 15px; padding: 15px; background: rgba(241, 245, 249, 0.5); border-radius: 6px; border: 1px dashed var(--border-color);">
+                        <h4 style="margin-bottom: 10px; font-weight: 600;"><i class="fas fa-clock"></i> Trigger Order</h4>
+                        <div class="form-group">
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <select id="trigger-condition" style="flex: 1;">
+                                    <option value="above">BTC Price Above</option>
+                                    <option value="below">BTC Price Below</option>
+                                </select>
+                                <input type="number" id="trigger-price" placeholder="BTC Price" step="0.01" style="flex: 2;">
+                            </div>
+                            <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                                Order will execute when BTC price crosses this level
+                            </small>
+                        </div>
+                        
+                        <!-- Time Limit Section -->
+                        <div style="margin-top: 15px; padding: 15px; background: rgba(241, 245, 249, 0.5); border-radius: 6px; border: 1px dashed var(--border-color);">
+                            <h4 style="margin-bottom: 10px; font-weight: 600;"><i class="fas fa-hourglass-half"></i> Time Limit (Optional)</h4>
+                            <div class="form-group">
+                                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <input type="number" id="time-limit" placeholder="Minutes (e.g., 10)" min="1" step="1" style="flex: 1;">
+                                </div>
+                                <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                                    If set, order will be cancelled if not executed within this time. Leave empty for no time limit.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Trades Panel with Tracking -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-exchange-alt"></i> Recent Trades</h2>
+                        <button class="btn btn-outline" onclick="loadAllTrades()" style="padding: 5px 10px; font-size: 0.9rem;">
+                            <i class="fas fa-archive"></i> Archive
+                        </button>
+                    </div>
+                    
+                    <div id="recent-trades" class="trades-list">
+                        <div style="color: var(--secondary-text); text-align: center; padding: 20px;">
+                            <i class="fas fa-exchange-alt"></i> No trades yet
+                        </div>
+                    </div>
+                    
+                    <!-- Trade Tracking Status -->
+                    <div id="tracking-status-container" class="tracking-status-container">
+                        <div class="tracking-header">
+                            <div>
+                                <i class="fas fa-sync-alt fa-spin"></i>
+                                <span style="margin-left: 8px; font-weight: 600;">Tracking Latest Trade</span>
+                            </div>
+                            <button class="btn btn-danger" onclick="stopTrackingLatestTrade()" style="padding: 5px 10px; font-size: 0.8rem;">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                        <div class="tracking-details" id="tracking-details">
+                            <!-- Tracking details will be updated here -->
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: var(--secondary-text); text-align: center;">
+                        Last 3 executed trades | <a href="#" onclick="loadAllTrades()" style="color: var(--accent-color); text-decoration: none;">View Archive</a>
+                    </div>
+                </div>
+                
+                <!-- Trade Log -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-history"></i> Trade Log</h2>
+                        <button class="btn btn-outline" onclick="clearLog()" style="padding: 5px 10px; font-size: 0.9rem;">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                    <div class="log-container" id="trade-log">
+                        <div class="log-entry log-info">System started...</div>
+                    </div>
+                </div>
+                
+                <!-- Pending Trigger Orders -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-clock"></i> Pending Trigger Orders</h2>
+                    </div>
+                    <div id="pending-orders" class="pending-orders">
+                        <div style="color: var(--secondary-text); text-align: center; padding: 20px;">
+                            No pending trigger orders
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Dialog -->
+    <div class="overlay" id="overlay"></div>
+    <div class="confirmation-dialog" id="confirmation-dialog">
+        <h3 style="margin-bottom: 20px; font-weight: 600;"><i class="fas fa-check-circle"></i> Confirm Order</h3>
+        <div id="order-details"></div>
+        <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button class="btn btn-success" onclick="confirmOrder()" style="flex: 1;">
+                <i class="fas fa-check"></i> Confirm
+            </button>
+            <button class="btn btn-danger" onclick="cancelOrder()" style="flex: 1;">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+    
+    <!-- Archive Modal -->
+    <div class="overlay" id="archive-overlay"></div>
+    <div class="archive-modal" id="archive-modal">
+        <div class="archive-header">
+            <h3><i class="fas fa-archive"></i> Trade Archive</h3>
+            <button class="btn btn-outline" onclick="closeArchiveModal()" style="padding: 5px 10px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="archive-list" id="archive-list">
+            <!-- Archive content will be loaded here -->
+        </div>
+        
+        <div class="archive-actions">
+            <button class="btn btn-danger" onclick="clearTradeHistory()">
+                <i class="fas fa-trash"></i> Clear All
+            </button>
+            <button class="btn btn-outline" onclick="exportTradesToCSV()">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+            <button class="btn btn-primary" onclick="closeArchiveModal()">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Global variables
+        let currentOrder = null;
+        let exitAboveFocused = false;
+        let exitBelowFocused = false;
+        
+        // Trade tracking variables
+        let tradeTrackingInterval = null;
+        let hourlyUpdateTimeout = null;
+        let isTrackingLatestTrade = false;
+        let trackedTradeData = null;
+        
+        // New global variables for tentative calculations
+        let currentBtcPrice = 0;
+        let indexExitParams = { above: null, below: null };
+        
+        // New variable for BTC to USD conversion
+        const BTC_TO_USD_RATE = 0.85; // 1 dollar = 0.85 BTC (adjust as needed)
+        
+        // Initialize page
+        $(document).ready(function() {
+            const today = new Date();
+            const nextDay = new Date(today);
+            nextDay.setDate(today.getDate() + 1);
+            const formattedDate = nextDay.toISOString().split('T')[0];
+            $('#expiry-date').val(formattedDate);
+            
+            // Load initial data
+            loadExitLevels();
+            updateBtcPrice();
+            loadPendingOrders();
+            loadRecentTrades();
+            
+            // Auto-refresh - ONLY BTC price and other data, NOT exit levels
+            setInterval(updateBtcPrice, 3000);
+            setInterval(loadPendingOrders, 10000);
+            setInterval(loadRecentTrades, 15000);
+            
+            // Clean up intervals on page unload
+            $(window).on('beforeunload', function() {
+                stopAllTracking();
+            });
+            
+            // Add event listener for mode switching
+            $('input[name="selection-mode"]').change(toggleSelectionMode);
+            
+            // Auto-select appropriate option type based on manual symbol
+            $('#manual-symbol').on('input', function() {
+                const symbol = $(this).val().toUpperCase();
+                if (symbol.startsWith('C-')) {
+                    $('#type-calls').prop('checked', true);
+                } else if (symbol.startsWith('P-')) {
+                    $('#type-puts').prop('checked', true);
+                }
+            });
+        });
+        
+        // Function to toggle selection mode
+        function toggleSelectionMode() {
+            const mode = $('input[name="selection-mode"]:checked').val();
+            const manualSection = $('#manual-symbol-section');
+            const expiryDateSection = $('label[for="expiry-date"]').parent();
+            const optionTypeSection = $('label:contains("Option Type")').parent();
+            
+            if (mode === 'manual') {
+                manualSection.show();
+                // Hide expiry date and option type for manual mode
+                expiryDateSection.hide();
+                optionTypeSection.hide();
+                
+                // Clear any existing options
+                $('#options-container').empty();
+            } else {
+                manualSection.hide();
+                // Show expiry date and option type for auto mode
+                expiryDateSection.show();
+                optionTypeSection.show();
+                
+                // Clear manual symbol input
+                $('#manual-symbol').val('');
+            }
+        }
+        
+        // Helper function to validate option symbol format
+        function validateOptionSymbol(symbol) {
+            const pattern = /^[CP]-\w+-\d+-\d+$/;
+            return pattern.test(symbol);
+        }
+        
+        // Stop all tracking intervals
+        function stopAllTracking() {
+            if (tradeTrackingInterval) {
+                clearInterval(tradeTrackingInterval);
+                tradeTrackingInterval = null;
+            }
+            
+            if (hourlyUpdateTimeout) {
+                clearTimeout(hourlyUpdateTimeout);
+                hourlyUpdateTimeout = null;
+            }
+        }
+        
+        // Update BTC price function with IP status
+        function updateBtcPrice() {
+            $.get('/get_state', function(response) {
+                const price = parseFloat(response.live_price);
+                const prevClose = parseFloat(response.previous_day_close);
+                
+                if (!isNaN(price)) {
+                    // Store current BTC price globally
+                    currentBtcPrice = price;
+                    
+                    // Update BTC price
+                    $('#btc-price').text('$' + price.toFixed(2));
+                    
+                    // Calculate and display change vs previous close
+                    if (!isNaN(prevClose) && prevClose > 0) {
+                        const change = price - prevClose;
+                        const changePercent = (change / prevClose) * 100;
+                        
+                        const changeAmount = $('#price-change-amount');
+                        const changePercentSpan = $('#price-change-percent');
+                        const changeIcon = $('#price-change-icon');
+                        const changeContainer = $('#price-change-container');
+                        
+                        // Format change amount with sign
+                        const formattedChange = change >= 0 ? 
+                            '+$' + Math.abs(change).toFixed(2) : 
+                            '-$' + Math.abs(change).toFixed(2);
+                        
+                        // Format percentage with sign
+                        const formattedPercent = changePercent >= 0 ?
+                            `(+${changePercent.toFixed(2)}%)` :
+                            `(${changePercent.toFixed(2)}%)`;
+                        
+                        // Update text
+                        changeAmount.text(formattedChange);
+                        changePercentSpan.text(formattedPercent);
+                        
+                        // Update styling based on change
+                        if (change > 0) {
+                            changeContainer.addClass('change-up');
+                            changeContainer.removeClass('change-down');
+                            changeIcon.removeClass('fa-arrow-down').addClass('fa-arrow-up');
+                            changeIcon.show();
+                        } else if (change < 0) {
+                            changeContainer.addClass('change-down');
+                            changeContainer.removeClass('change-up');
+                            changeIcon.removeClass('fa-arrow-up').addClass('fa-arrow-down');
+                            changeIcon.show();
+                        } else {
+                            changeContainer.removeClass('change-up change-down');
+                            changeIcon.hide();
+                        }
+                    }
+                    
+                    // Update IP status
+                    if (response.current_ip) {
+                        $('#current-ip-display').text(response.current_ip);
+                        
+                        // Update verification status
+                        const isVerified = response.ip_verified;
+                        const ipText = $('#ip-verified-text');
+                        
+                        if (isVerified === true) {
+                            ipText.text('Verified').removeClass('verified-false verified-checking').addClass('verified-true');
+                        } else if (isVerified === false) {
+                            ipText.text('Not Verified').removeClass('verified-true verified-checking').addClass('verified-false');
+                        } else {
+                            ipText.text('Checking...').removeClass('verified-true verified-false').addClass('verified-checking');
+                        }
+                    }
+                }
+            }).fail(function() {
+                console.log('Failed to fetch state');
+            });
+        }
+        
+        // Exit Levels Functions - SIMPLIFIED VERSION
+        function loadExitLevels() {
+            // This function now only runs ONCE on page load and when manually triggered
+            $.get('/get_index_exit_params', function(response) {
+                if (response.success) {
+                    const levels = response.levels;
+                    
+                    // Store index exit params globally
+                    indexExitParams = levels;
+                    
+                    // Update display
+                    updateExitDisplay(levels);
+                    
+                    // Update status
+                    const isActive = (levels.above && levels.above.price) || (levels.below && levels.below.price);
+                    const statusElement = $('#exit-status');
+                    if (isActive) {
+                        statusElement.text('Active').removeClass('status-inactive').addClass('status-active');
+                    } else {
+                        statusElement.text('Not Active').removeClass('status-active').addClass('status-inactive');
+                    }
+                }
+            });
+        }
+        
+        function updateExitDisplay(levels) {
+            let aboveText = 'Not Set';
+            let belowText = 'Not Set';
+            
+            if (levels.above && levels.above.price) {
+                aboveText = `${levels.above.price}`;
+                if (levels.above.type === 'sl') {
+                    aboveText += ' <span class="type-sl">(Stop Loss)</span>';
+                } else if (levels.above.type === 'target') {
+                    aboveText += ' <span class="type-target">(Target)</span>';
+                }
+            }
+            
+            if (levels.below && levels.below.price) {
+                belowText = `${levels.below.price}`;
+                if (levels.below.type === 'sl') {
+                    belowText += ' <span class="type-sl">(Stop Loss)</span>';
+                } else if (levels.below.type === 'target') {
+                    belowText += ' <span class="type-target">(Target)</span>';
+                }
+            }
+            
+            $('#current-above').html(aboveText);
+            $('#current-below').html(belowText);
+        }
+        
+        function setExitLevels() {
+            const above = $('#exit-above').val();
+            const below = $('#exit-below').val();
+            const aboveType = $('input[name="above-type"]:checked').val() || null;
+            const belowType = $('input[name="below-type"]:checked').val() || null;
+            
+            // Agar dono empty hain, to error show karo
+            if (!above && !below) {
+                showNotification('Please set at least one exit level', 'error');
+                return;
+            }
+            
+            // Create data object with ONLY values that are changed
+            let data = {};
+            
+            // Only add above if it has value or is being cleared
+            if (above !== '') {
+                data.exit_above = above || null;
+                data.above_type = aboveType;
+            }
+            
+            // Only add below if it has value or is being cleared
+            if (below !== '') {
+                data.exit_below = below || null;
+                data.below_type = belowType;
+            }
+            
+            // Agar kuch bhi change nahi hai
+            if (Object.keys(data).length === 0) {
+                showNotification('No changes detected', 'info');
+                return;
+            }
+            
+            console.log("Sending only changed data:", data);
+            
+            $.ajax({
+                url: '/update_index_exit',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success) {
+                        showNotification('Exit levels updated successfully!', 'success');
+                        
+                        // Update local display immediately
+                        updateExitDisplay(response.levels);
+                        
+                        // Also update the input fields with the values we just set
+                        $('#exit-above').val(above || '');
+                        $('#exit-below').val(below || '');
+                        
+                        // Update radio buttons
+                        if (aboveType !== undefined) {
+                            $(`input[name="above-type"][value="${aboveType}"]`).prop('checked', true);
+                        }
+                        
+                        if (belowType !== undefined) {
+                            $(`input[name="below-type"][value="${belowType}"]`).prop('checked', true);
+                        }
+                        
+                        // Update global indexExitParams
+                        indexExitParams = response.levels;
+                        
+                        // Update status
+                        const isActive = (above || below);
+                        const statusElement = $('#exit-status');
+                        if (isActive) {
+                            statusElement.text('Active').removeClass('status-inactive').addClass('status-active');
+                        } else {
+                            statusElement.text('Not Active').removeClass('status-active').addClass('status-inactive');
+                        }
+                        
+                    } else {
+                        showNotification('Error: ' + response.error, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showNotification('Error setting exit levels: ' + error, 'error');
+                }
+            });
+        }
+        
+        function clearExitLevels() {
+            $.post('/clear_exit_levels', function(response) {
+                if (response.success) {
+                    showNotification('Exit levels cleared!', 'success');
+                    // Reset inputs and display
+                    $('#exit-above').val('');
+                    $('#exit-below').val('');
+                    $('input[name="above-type"][value=""]').prop('checked', true);
+                    $('input[name="below-type"][value=""]').prop('checked', true);
+                    updateExitDisplay(response.levels);
+                    
+                    // Update status
+                    $('#exit-status').text('Not Active').removeClass('status-active').addClass('status-inactive');
+                    
+                    // Update global indexExitParams
+                    indexExitParams = response.levels;
+                }
+            });
+        }
+        
+        // Greeks Calculator Functions
+        function fetchGreeks() {
+            const symbol = $('#option-symbol').val().trim();
+            if (!symbol) {
+                showNotification('Please enter an option symbol', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: '/fetch_greeks',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ option_symbol: symbol }),
+                success: function(response) {
+                    if (response.success) {
+                        $('#greek-price').text('$' + (parseFloat(response.mark_price) || 0).toFixed(2));
+                        $('#greek-delta').text(parseFloat(response.delta || 0).toFixed(4));
+                        $('#greek-gamma').text(parseFloat(response.gamma || 0).toFixed(6));
+                        $('#greek-theta').text(parseFloat(response.theta || 0).toFixed(4));
+                        $('#greek-vega').text(parseFloat(response.vega || 0).toFixed(4));
+                        $('#greek-rho').text(parseFloat(response.rho || 0).toFixed(4));
+                        $('#greeks-results').show();
+                        
+                        showNotification('Greeks fetched successfully!', 'success');
+                    } else {
+                        showNotification('Error: ' + response.error, 'error');
+                    }
+                }
+            });
+        }
+        
+        function calculateTarget() {
+            const targetPrice = parseFloat($('#target-price').val());
+            const delta = parseFloat($('#greek-delta').text());
+            const currentOptionPrice = parseFloat($('#greek-price').text().replace('$', ''));
+            
+            if (isNaN(targetPrice) || isNaN(delta) || isNaN(currentOptionPrice)) {
+                showNotification('Please fetch Greeks first and enter a target price', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: '/calculate_target_price',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    current_price: currentBtcPrice,
+                    target_price: targetPrice,
+                    delta: delta,
+                    current_option_price: currentOptionPrice
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        $('#estimated-price').text('$' + response.estimated_price.toFixed(2));
+                        $('#target-result').show();
+                        showNotification('Calculation completed!', 'success');
+                    } else {
+                        showNotification('Error: ' + response.error, 'error');
+                    }
+                }
+            });
+        }
+        
+        // NEW FUNCTION: Calculate projected P&L for an option
+        function calculateProjectedPNL(option, quantity, side) {
+            if (!option || !option.greeks || !option.mark_price) {
+                return null;
+            }
+            
+            const currentOptionPrice = parseFloat(option.mark_price);
+            const delta = parseFloat(option.greeks.delta || 0);
+            const results = [];
+            
+            // Helper function to calculate option price at a target BTC price
+            function calculateOptionPriceAtBtcLevel(btcTargetPrice, delta, currentOptionPrice, currentBtcPrice) {
+                const btcPriceChange = btcTargetPrice - currentBtcPrice;
+                const optionPriceChange = btcPriceChange * delta;
+                return currentOptionPrice + optionPriceChange;
+            }
+            
+            // Check above level
+            if (indexExitParams.above && indexExitParams.above.price && indexExitParams.above.type) {
+                const btcTargetPrice = parseFloat(indexExitParams.above.price);
+                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
+                    btcTargetPrice, 
+                    delta, 
+                    currentOptionPrice, 
+                    currentBtcPrice
+                );
+                
+                // Calculate P&L based on trade side (buy or sell)
+                let pnl, pnlPercent;
+                if (side === 'buy') {
+                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
+                } else { // sell
+                    pnl = (currentOptionPrice - projectedOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
+                }
+                
+                // Convert to USD if needed
+                const pnlUSD = pnl * BTC_TO_USD_RATE;
+                
+                results.push({
+                    level: 'above',
+                    type: indexExitParams.above.type, // 'sl' or 'target'
+                    btcPrice: btcTargetPrice,
+                    projectedOptionPrice: projectedOptionPrice,
+                    pnl: pnl,
+                    pnlUSD: pnlUSD,
+                    pnlPercent: pnlPercent,
+                    isProfit: (side === 'buy' && indexExitParams.above.type === 'target') || 
+                             (side === 'sell' && indexExitParams.above.type === 'sl')
+                });
+            }
+            
+            // Check below level
+            if (indexExitParams.below && indexExitParams.below.price && indexExitParams.below.type) {
+                const btcTargetPrice = parseFloat(indexExitParams.below.price);
+                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
+                    btcTargetPrice, 
+                    delta, 
+                    currentOptionPrice, 
+                    currentBtcPrice
+                );
+                
+                // Calculate P&L based on trade side (buy or sell)
+                let pnl, pnlPercent;
+                if (side === 'buy') {
+                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
+                } else { // sell
+                    pnl = (currentOptionPrice - projectedOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
+                }
+                
+                // Convert to USD if needed
+                const pnlUSD = pnl * BTC_TO_USD_RATE;
+                
+                results.push({
+                    level: 'below',
+                    type: indexExitParams.below.type, // 'sl' or 'target'
+                    btcPrice: btcTargetPrice,
+                    projectedOptionPrice: projectedOptionPrice,
+                    pnl: pnl,
+                    pnlUSD: pnlUSD,
+                    pnlPercent: pnlPercent,
+                    isProfit: (side === 'buy' && indexExitParams.below.type === 'target') || 
+                             (side === 'sell' && indexExitParams.below.type === 'sl')
+                });
+            }
+            
+            return results;
+        }
+        
+        // NEW FUNCTION: Generate HTML for projected P&L
+        function generateProjectedPNLHTML(pnlResults, side) {
+            if (!pnlResults || pnlResults.length === 0) {
+                return '';
+            }
+            
+            let html = `
+                <div class="projected-pnl">
+                    <div class="projected-pnl-header">
+                        <i class="fas fa-chart-line"></i>
+                        Projected P&L (Based on Index Exit Levels)
+                    </div>
+            `;
+            
+            pnlResults.forEach(result => {
+                const pnlClass = result.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+                const pnlSign = result.pnl >= 0 ? '+' : '';
+                const pnlPercentSign = result.pnlPercent >= 0 ? '+' : '';
+                
+                html += `
+                    <div class="projected-level ${result.type}">
+                        <span class="level-type ${result.type}">
+                            ${result.type === 'sl' ? 'STOP LOSS' : 'TARGET'}
+                            ${result.level === 'above' ? ' (Above)' : ' (Below)'}
+                        </span>
+                        <span style="font-weight: 600;">BTC: $${result.btcPrice.toFixed(2)}</span>
+                        
+                        <div class="projected-details">
+                            <div class="projected-row">
+                                <span class="projected-label">Option Price at Target:</span>
+                                <span class="projected-value">$${result.projectedOptionPrice.toFixed(2)}</span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">P&L (${side.toUpperCase()}):</span>
+                                <span class="projected-value ${pnlClass}">
+                                    ${pnlSign}$${Math.abs(result.pnl).toFixed(4)} BTC
+                                    (${pnlPercentSign}${Math.abs(result.pnlPercent).toFixed(2)}%)
+                                </span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">P&L in USD (approx):</span>
+                                <span class="projected-value ${pnlClass}">
+                                    ${pnlSign}$${Math.abs(result.pnlUSD).toFixed(2)}
+                                </span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">Expected Result:</span>
+                                <span class="projected-value" style="color: ${result.isProfit ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                    ${result.isProfit ? 'PROFIT 🟢' : 'LOSS 🔴'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary-text);">
+                    <i class="fas fa-info-circle"></i> Based on Delta: ${pnlResults[0]?.delta?.toFixed(4) || 'N/A'}, 
+                    Current BTC: $${currentBtcPrice.toFixed(2)}
+                </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        // Find & Trade Options - MODIFIED FUNCTION
+        function findOptions() {
+            const mode = $('input[name="selection-mode"]:checked').val();
+            
+            if (mode === 'manual') {
+                const manualSymbol = $('#manual-symbol').val().trim();
+                if (!manualSymbol) {
+                    showNotification('Please enter an option symbol', 'error');
+                    return;
+                }
+                
+                // Validate symbol format
+                if (!validateOptionSymbol(manualSymbol)) {
+                    showNotification('Invalid option symbol format. Use: C/P-BTC-Strike-Expiry (e.g., C-BTC-93000-200126)', 'error');
+                    return;
+                }
+                
+                findManualOption(manualSymbol);
+            } else {
+                findAutoOptions();
+            }
+        }
+        
+        // New function for manual option lookup
+        function findManualOption(symbol) {
+            logMessage(`Searching for manual option: ${symbol}...`, 'info');
+            
+            // Parse symbol to get option type
+            const parts = symbol.split('-');
+            const optionType = parts[0].toUpperCase() === 'C' ? 'Calls' : 'Puts';
+            const action = $('input[name="action"]:checked').val();
+            const quantity = $('#quantity').val();
+            
+            // Fetch option data using the updated endpoint
+            $.ajax({
+                url: '/get_options_chain',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    manual_symbol: symbol,
+                    option_type: optionType
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        displayIndividualOptions(response.options, action, quantity);
+                        showNotification(`Found option: ${symbol}`, 'success');
+                    } else {
+                        showNotification('Error: ' + response.error, 'error');
+                        logMessage('Manual search failed: ' + response.error, 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showNotification('Error: Failed to fetch option data', 'error');
+                    logMessage('Manual search error: ' + error, 'error');
+                }
+            });
+        }
+        
+        // Original auto-find function
+        function findAutoOptions() {
+            const dateInput = $('#expiry-date').val();
+            if (!dateInput) {
+                showNotification('Please select an expiry date', 'error');
+                return;
+            }
+            
+            const date = new Date(dateInput);
+            const expiryDate = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}/${String(date.getFullYear()).slice(-2)}`;
+            const optionType = $('input[name="option-type"]:checked').val();
+            const action = $('input[name="action"]:checked').val();
+            const quantity = $('#quantity').val();
+            
+            logMessage(`Searching for ${optionType} options...`, 'info');
+            
+            $.ajax({
+                url: '/get_options_chain',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    expiry_date: expiryDate,
+                    option_type: optionType
+                }),
+                success: function(response) {
+                    if (response.success) {
+                        displayOptions(response.options, action, quantity);
+                        showNotification(`Found ${response.filtered_count} suitable option(s)`, 'success');
+                    } else {
+                        showNotification('Error: ' + response.error, 'error');
+                        logMessage('Search failed: ' + response.error, 'error');
+                    }
+                }
+            });
+        }
+        
+        async function displayOptions(options, action, quantity) {
+            const container = $('#options-container');
+            container.empty();
+            
+            if (!options || options.length === 0) {
+                container.html('<div style="text-align: center; padding: 20px; color: var(--secondary-text);">No options found</div>');
+                return;
+            }
+            
+            const optionType = $('input[name="option-type"]:checked').val();
+            
+            if (optionType === 'Straddle') {
+                const strikes = {};
+                
+                options.forEach(opt => {
+                    const strike = parseFloat(opt.symbol.split('-')[2]);
+                    if (!strikes[strike]) {
+                        strikes[strike] = { call: null, put: null };
+                    }
+                    if (opt.contract_type === 'call_options') {
+                        strikes[strike].call = opt;
+                    } else if (opt.contract_type === 'put_options') {
+                        strikes[strike].put = opt;
+                    }
+                });
+                
+                let straddleFound = false;
+                for (const [strike, pair] of Object.entries(strikes)) {
+                    if (pair.call && pair.put) {
+                        straddleFound = true;
+                        const call = pair.call;
+                        const put = pair.put;
+                        
+                        // Calculate projected P&L for call and put
+                        const callPnlResults = calculateProjectedPNL(call, quantity, action);
+                        const putPnlResults = calculateProjectedPNL(put, quantity, action);
+                        
+                        let projectedPNLHtml = '';
+                        
+                        // Combine P&L results for straddle
+                        if ((callPnlResults && callPnlResults.length > 0) || (putPnlResults && putPnlResults.length > 0)) {
+                            projectedPNLHtml = `
+                                <div class="projected-pnl">
+                                    <div class="projected-pnl-header">
+                                        <i class="fas fa-chart-line"></i>
+                                        Projected P&L for Straddle
+                                    </div>
+                            `;
+                            
+                            // Process combined results
+                            const allResults = [...(callPnlResults || []), ...(putPnlResults || [])];
+                            const groupedResults = {};
+                            
+                            allResults.forEach(result => {
+                                const key = `${result.level}_${result.type}`;
+                                if (!groupedResults[key]) {
+                                    groupedResults[key] = {
+                                        level: result.level,
+                                        type: result.type,
+                                        btcPrice: result.btcPrice,
+                                        callPnl: 0,
+                                        putPnl: 0,
+                                        totalPnl: 0,
+                                        totalPnlUSD: 0
+                                    };
+                                }
+                                
+                                // Determine if this is call or put result
+                                if (Math.abs(result.delta || 0) > 0.4) { // Assuming call has positive delta
+                                    groupedResults[key].callPnl = result.pnl;
+                                } else {
+                                    groupedResults[key].putPnl = result.pnl;
+                                }
+                            });
+                            
+                            // Calculate totals
+                            Object.values(groupedResults).forEach(result => {
+                                result.totalPnl = result.callPnl + result.putPnl;
+                                result.totalPnlUSD = result.totalPnl * BTC_TO_USD_RATE;
+                                result.isProfit = result.totalPnl >= 0;
+                            });
+                            
+                            // Display grouped results
+                            Object.values(groupedResults).forEach(result => {
+                                const pnlClass = result.totalPnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+                                const pnlSign = result.totalPnl >= 0 ? '+' : '';
+                                const levelText = result.level === 'above' ? 'Above' : 'Below';
+                                
+                                projectedPNLHtml += `
+                                    <div class="projected-level ${result.type}">
+                                        <span class="level-type ${result.type}">
+                                            ${result.type === 'sl' ? 'STOP LOSS' : 'TARGET'} (${levelText})
+                                        </span>
+                                        <span style="font-weight: 600;">BTC: $${result.btcPrice.toFixed(2)}</span>
+                                        
+                                        <div class="projected-details">
+                                            <div class="projected-row">
+                                                <span class="projected-label">Call P&L:</span>
+                                                <span class="projected-value ${result.callPnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">
+                                                    ${result.callPnl >= 0 ? '+' : ''}$${Math.abs(result.callPnl).toFixed(4)} BTC
+                                                </span>
+                                            </div>
+                                            <div class="projected-row">
+                                                <span class="projected-label">Put P&L:</span>
+                                                <span class="projected-value ${result.putPnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">
+                                                    ${result.putPnl >= 0 ? '+' : ''}$${Math.abs(result.putPnl).toFixed(4)} BTC
+                                                </span>
+                                            </div>
+                                            <div class="projected-row">
+                                                <span class="projected-label">Total P&L:</span>
+                                                <span class="projected-value ${pnlClass}">
+                                                    ${pnlSign}$${Math.abs(result.totalPnl).toFixed(4)} BTC
+                                                </span>
+                                            </div>
+                                            <div class="projected-row">
+                                                <span class="projected-label">Total in USD:</span>
+                                                <span class="projected-value ${pnlClass}">
+                                                    ${pnlSign}$${Math.abs(result.totalPnlUSD).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div class="projected-row">
+                                                <span class="projected-label">Expected Result:</span>
+                                                <span class="projected-value" style="color: ${result.isProfit ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                                    ${result.isProfit ? 'PROFIT 🟢' : 'LOSS 🔴'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            projectedPNLHtml += `
+                                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary-text);">
+                                    <i class="fas fa-info-circle"></i> Straddle: Both Call and Put combined
+                                </div>
+                                </div>
+                            `;
+                        }
+                        
+                        const card = `
+                            <div class="option-card">
+                                <div class="option-header">
+                                    <div class="option-symbol">STRADDLE ${strike}</div>
+                                    <div class="option-type type-call">STRADDLE</div>
+                                </div>
+                                <div class="option-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Call Price</span>
+                                        <span class="detail-value">$${call.mark_price?.toFixed(2) || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Put Price</span>
+                                        <span class="detail-value">$${put.mark_price?.toFixed(2) || 'N/A'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Total Premium</span>
+                                        <span class="detail-value">$${((call.mark_price + put.mark_price) * quantity * 0.001).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                                
+                                ${projectedPNLHtml}
+                                
+                                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                                    <button class="btn btn-success" onclick="showOrderDialog('STRADDLE ${strike}', ${call.product_id}, '${action}', ${quantity}, ${call.mark_price || 0}, ${put.product_id}, ${put.mark_price || 0})">
+                                        <i class="fas fa-shopping-cart"></i> Trade Now
+                                    </button>
+                                    <button class="btn btn-primary" onclick="showTriggerDialog('STRADDLE ${strike}', ${call.product_id}, '${action}', ${quantity}, ${call.mark_price || 0}, ${put.product_id}, ${put.mark_price || 0})">
+                                        <i class="fas fa-clock"></i> Set Trigger
+                                    </button>
+                                </div>
+                            </div>`;
+                        container.append(card);
+                    }
+                }
+                
+                if (!straddleFound) {
+                    logMessage('No complete straddle found. Showing individual options.', 'warning');
+                    displayIndividualOptions(options, action, quantity);
+                }
+            } else {
+                displayIndividualOptions(options, action, quantity);
+            }
+        }
+        
+        function displayIndividualOptions(options, action, quantity) {
+            const container = $('#options-container');
+            
+            options.forEach(option => {
+                const isCall = option.contract_type === 'call_options';
+                const strike = option.symbol.split('-')[2];
+                const premium = option.mark_price || 0;
+                const delta = option.greeks?.delta || 0;
+                const gamma = option.greeks?.gamma || 0;
+                const theta = option.greeks?.theta || 0;
+                
+                // Calculate projected P&L
+                const pnlResults = calculateProjectedPNL(option, quantity, action);
+                const projectedPNLHtml = generateProjectedPNLHTML(pnlResults, action);
+                
+                const card = `
+                    <div class="option-card">
+                        <div class="option-header">
+                            <div class="option-symbol">${option.symbol}</div>
+                            <div class="option-type ${isCall ? 'type-call' : 'type-put'}">
+                                ${isCall ? 'CALL' : 'PUT'}
+                            </div>
+                        </div>
+                        <div class="option-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Strike</span>
+                                <span class="detail-value">$${strike}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Premium</span>
+                                <span class="detail-value">$${premium.toFixed(2)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Delta</span>
+                                <span class="detail-value">${delta.toFixed(4)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Gamma</span>
+                                <span class="detail-value">${gamma.toFixed(6)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Theta</span>
+                                <span class="detail-value">${theta.toFixed(4)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Cost</span>
+                                <span class="detail-value">$${(premium * quantity * 0.001).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        ${projectedPNLHtml}
+                        
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn btn-success" onclick="showOrderDialog('${option.symbol}', ${option.product_id}, '${action}', ${quantity}, ${premium})">
+                                <i class="fas fa-shopping-cart"></i> Trade Now
+                            </button>
+                            <button class="btn btn-primary" onclick="showTriggerDialog('${option.symbol}', ${option.product_id}, '${action}', ${quantity}, ${premium})">
+                                <i class="fas fa-clock"></i> Set Trigger
+                            </button>
+                        </div>
+                    </div>`;
+                container.append(card);
+            });
+        }
+        
+        function showOrderDialog(symbol, productId, action, quantity, markPrice, secondProductId = null, secondMarkPrice = null) {
+            currentOrder = {
+                symbol: symbol,
+                product_id: productId,
+                second_product_id: secondProductId || null,
+                side: action,
+                size: quantity,
+                is_trigger: false,
+                is_straddle: secondProductId !== null,
+                mark_price: markPrice,
+                strike_price: symbol.split('-')[2]
+            };
+            
+            let detailsHtml = `
+                <div class="order-details">
+                    <p><strong>Symbol:</strong> ${symbol}</p>
+                    <p><strong>Action:</strong> ${action.toUpperCase()}</p>
+                    <p><strong>Quantity:</strong> ${quantity}</p>`;
+            
+            if (secondProductId) {
+                detailsHtml += `
+                    <p><strong>Call Price:</strong> $${markPrice.toFixed(2)}</p>
+                    <p><strong>Put Price:</strong> $${secondMarkPrice.toFixed(2)}</p>
+                    <p><strong>Total Cost:</strong> $${((markPrice + secondMarkPrice) * quantity * 0.001).toFixed(2)}</p>`;
+            } else {
+                detailsHtml += `
+                    <p><strong>Mark Price:</strong> $${markPrice.toFixed(2)}</p>
+                    <p><strong>Total Cost:</strong> $${(markPrice * quantity * 0.001).toFixed(2)}</p>`;
+            }
+            
+            detailsHtml += `
+                <div class="trigger-order-section">
+                    <h4 style="margin-top: 15px; font-weight: 600;">Execution Type</h4>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="trigger_instant" name="trigger_type" value="instant" checked>
+                            <label for="trigger_instant">Execute Instantly</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="trigger_conditional" name="trigger_type" value="conditional">
+                            <label for="trigger_conditional">Trigger When BTC Price</label>
+                        </div>
+                    </div>
+                    
+                    <div id="trigger_condition_container" style="display: none; margin-top: 15px;">
+                        <div class="trigger-inputs">
+                            <select id="trigger_condition" class="form-control">
+                                <option value="above">Above</option>
+                                <option value="below">Below</option>
+                            </select>
+                            <input type="number" id="trigger_price" class="form-control" placeholder="BTC Price" step="0.01">
+                        </div>
+                        
+                        <!-- Time Limit for Trigger Orders -->
+                        <div style="margin-top: 15px;">
+                            <label style="font-weight: 600;">Time Limit (optional, minutes):</label>
+                            <input type="number" id="time_limit" class="form-control" placeholder="e.g., 10" min="1" step="1">
+                            <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                                If set, order will be cancelled if not executed within this time. Leave empty for no time limit.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+            $('#order-details').html(detailsHtml);
+            $('#overlay, #confirmation-dialog').show();
+            
+            $('input[name="trigger_type"]').change(function() {
+                if ($(this).val() === 'conditional') {
+                    $('#trigger_condition_container').show();
+                } else {
+                    $('#trigger_condition_container').hide();
+                }
+            });
+        }
+        
+        function showTriggerDialog(symbol, productId, action, quantity, markPrice, secondProductId = null, secondMarkPrice = null) {
+            currentOrder = {
+                symbol: symbol,
+                product_id: productId,
+                second_product_id: secondProductId || null,
+                side: action,
+                size: quantity,
+                is_trigger: true,
+                is_straddle: secondProductId !== null,
+                mark_price: markPrice,
+                strike_price: symbol.split('-')[2]
+            };
+            
+            let detailsHtml = `
+                <div class="order-details">
+                    <p><strong>Symbol:</strong> ${symbol}</p>
+                    <p><strong>Action:</strong> ${action.toUpperCase()}</p>
+                    <p><strong>Quantity:</strong> ${quantity}</p>`;
+            
+            if (secondProductId) {
+                detailsHtml += `
+                    <p><strong>Call Price:</strong> $${markPrice.toFixed(2)}</p>
+                    <p><strong>Put Price:</strong> $${secondMarkPrice.toFixed(2)}</p>
+                    <p><strong>Total Cost:</strong> $${((markPrice + secondMarkPrice) * quantity * 0.001).toFixed(2)}</p>`;
+            } else {
+                detailsHtml += `
+                    <p><strong>Mark Price:</strong> $${markPrice.toFixed(2)}</p>
+                    <p><strong>Total Cost:</strong> $${(markPrice * quantity * 0.001).toFixed(2)}</p>`;
+            }
+            
+            detailsHtml += `
+                <div style="margin-top: 15px;">
+                    <label style="font-weight: 600;">Trigger Condition:</label>
+                    <div class="trigger-inputs">
+                        <select id="trigger_condition" class="form-control">
+                            <option value="above">BTC Price Above</option>
+                            <option value="below">BTC Price Below</option>
+                        </select>
+                        <input type="number" id="trigger_price" class="form-control" placeholder="Trigger Price" step="0.01">
+                    </div>
+                    <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                        Order will execute when BTC price crosses this level
+                    </small>
+                </div>
+                
+                <!-- Time Limit for Trigger Orders -->
+                <div style="margin-top: 15px;">
+                    <label style="font-weight: 600;">Time Limit (optional, minutes):</label>
+                    <input type="number" id="time_limit" class="form-control" placeholder="e.g., 10" min="1" step="1">
+                    <small style="color: var(--secondary-text); display: block; margin-top: 5px;">
+                        If set, order will be cancelled if not executed within this time. Leave empty for no time limit.
+                    </small>
+                </div>
+            </div>`;
+            
+            $('#order-details').html(detailsHtml);
+            $('#overlay, #confirmation-dialog').show();
+        }
+        
+        function confirmOrder() {
+            if (!currentOrder) return;
+            
+            if (currentOrder.is_trigger) {
+                const triggerPrice = parseFloat($('#trigger_price').val());
+                const triggerCondition = $('#trigger_condition').val();
+                const timeLimit = $('#time_limit').val() || null;
+                
+                if (isNaN(triggerPrice)) {
+                    showNotification('Please enter a valid trigger price', 'error');
+                    return;
+                }
+                
+                // Add trigger order with time limit
+                const triggerOrder = {
+                    ...currentOrder,
+                    trigger_price: triggerPrice,
+                    trigger_condition: triggerCondition,
+                    time_limit: timeLimit ? parseInt(timeLimit) : null,
+                    mark_price: currentOrder.mark_price,
+                    total_cost: currentOrder.is_straddle ? 
+                        (currentOrder.mark_price + (currentOrder.second_mark_price || 0)) * currentOrder.size * 0.001 :
+                        currentOrder.mark_price * currentOrder.size * 0.001
+                };
+                
+                $.ajax({
+                    url: '/add_trigger_order',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(triggerOrder),
+                    success: function(response) {
+                        $('#overlay, #confirmation-dialog').hide();
+                        if (response.success) {
+                            showNotification('Trigger order added successfully!', 'success');
+                            let msg = `Trigger order added: ${currentOrder.symbol} (${triggerCondition} ${triggerPrice})`;
+                            if (timeLimit) msg += ` with ${timeLimit} min time limit`;
+                            logMessage(msg, 'success');
+                            loadPendingOrders();
+                        } else {
+                            showNotification('Error: ' + response.error, 'error');
+                        }
+                        currentOrder = null;
+                    }
+                });
+            } else {
+                const triggerType = $('input[name="trigger_type"]:checked').val();
+                
+                if (triggerType === 'conditional') {
+                    const triggerPrice = parseFloat($('#trigger_price').val());
+                    const triggerCondition = $('#trigger_condition').val();
+                    const timeLimit = $('#time_limit').val() || null;
+                    
+                    if (isNaN(triggerPrice)) {
+                        showNotification('Please enter a valid trigger price', 'error');
+                        return;
+                    }
+                    
+                    // Add trigger order with time limit
+                    const triggerOrder = {
+                        ...currentOrder,
+                        trigger_price: triggerPrice,
+                        trigger_condition: triggerCondition,
+                        time_limit: timeLimit ? parseInt(timeLimit) : null,
+                        mark_price: currentOrder.mark_price,
+                        total_cost: currentOrder.is_straddle ? 
+                            (currentOrder.mark_price + (currentOrder.second_mark_price || 0)) * currentOrder.size * 0.001 :
+                            currentOrder.mark_price * currentOrder.size * 0.001
+                    };
+                    
+                    $.ajax({
+                        url: '/add_trigger_order',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(triggerOrder),
+                        success: function(response) {
+                            $('#overlay, #confirmation-dialog').hide();
+                            if (response.success) {
+                                showNotification('Trigger order added successfully!', 'success');
+                                let msg = `Trigger order added: ${currentOrder.symbol} (${triggerCondition} ${triggerPrice})`;
+                                if (timeLimit) msg += ` with ${timeLimit} min time limit`;
+                                logMessage(msg, 'success');
+                                loadPendingOrders();
+                            } else {
+                                showNotification('Error: ' + response.error, 'error');
+                            }
+                            currentOrder = null;
+                        }
+                    });
+                } else {
+                    // Place instant order
+                    $('#overlay, #confirmation-dialog').hide();
+                    logMessage(`Placing ${currentOrder.side} order for ${currentOrder.symbol} (Qty: ${currentOrder.size})...`, 'info');
+                    
+                    const orderData = {
+                        symbol: currentOrder.symbol,
+                        product_id: currentOrder.product_id,
+                        side: currentOrder.side,
+                        size: currentOrder.size,
+                        mark_price: currentOrder.mark_price,
+                        total_cost: currentOrder.is_straddle ? 
+                            (currentOrder.mark_price + (currentOrder.second_mark_price || 0)) * currentOrder.size * 0.001 :
+                            currentOrder.mark_price * currentOrder.size * 0.001,
+                        order_type: 'instant',
+                        is_straddle: currentOrder.is_straddle
+                    };
+                    
+                    if (currentOrder.is_straddle) {
+                        const callOrder = { ...orderData };
+                        const putOrder = {
+                            ...orderData,
+                            product_id: currentOrder.second_product_id,
+                            mark_price: currentOrder.second_mark_price || 0
+                        };
+                        
+                        $.ajax({
+                            url: '/place_option_order',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(callOrder),
+                            success: function(response1) {
+                                if (response1.success) {
+                                    logMessage(`Call order placed: ${response1.order_id}`, 'success');
+                                    loadRecentTrades();
+                                } else {
+                                    logMessage(`Call order failed: ${response1.error}`, 'error');
+                                }
+                                
+                                $.ajax({
+                                    url: '/place_option_order',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(putOrder),
+                                    success: function(response2) {
+                                        if (response2.success) {
+                                            logMessage(`Put order placed: ${response2.order_id}`, 'success');
+                                            showNotification('Straddle order placed successfully!', 'success');
+                                            loadRecentTrades();
+                                        } else {
+                                            logMessage(`Put order failed: ${response2.error}`, 'error');
+                                        }
+                                        currentOrder = null;
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        $.ajax({
+                            url: '/place_option_order',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(orderData),
+                            success: function(response) {
+                                if (response.success) {
+                                    showNotification('Order placed successfully!', 'success');
+                                    logMessage(`Order executed: ${currentOrder.symbol} (${currentOrder.side.toUpperCase()}) - ID: ${response.order_id}`, 'success');
+                                    loadRecentTrades();
+                                    
+                                    // Schedule automatic hourly tracking for this trade
+                                    scheduleHourlyTradeTracking({
+                                        symbol: currentOrder.symbol,
+                                        side: currentOrder.side,
+                                        price: currentOrder.mark_price,
+                                        timestamp: new Date().toISOString()
+                                    });
+                                } else {
+                                    showNotification('Error: ' + response.error, 'error');
+                                }
+                                currentOrder = null;
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        
+        function cancelOrder() {
+            $('#overlay, #confirmation-dialog').hide();
+            showNotification('Order cancelled', 'warning');
+            currentOrder = null;
+        }
+        
+        // Pending Orders
+        function loadPendingOrders() {
+            $.get('/get_pending_trigger_orders', function(response) {
+                if (response.success) {
+                    const container = $('#pending-orders');
+                    container.empty();
+                    
+                    if (response.orders.length === 0) {
+                        container.html('<div style="color: var(--secondary-text); text-align: center; padding: 20px;">No pending trigger orders</div>');
+                        return;
+                    }
+                    
+                    response.orders.forEach(order => {
+                        const timeLimitText = order.time_limit ? 
+                            `<div style="font-size: 0.8rem; color: var(--warning-color);">Time Limit: ${order.time_limit} min</div>` : '';
+                        
+                        const orderElement = `
+                            <div class="pending-order">
+                                <div>
+                                    <div><strong>${order.symbol}</strong> (${order.side.toUpperCase()})</div>
+                                    <div style="font-size: 0.9rem; color: var(--secondary-text);">
+                                        Trigger: ${order.trigger_condition} $${order.trigger_price}
+                                    </div>
+                                    ${timeLimitText}
+                                </div>
+                                <div>
+                                    <button class="btn btn-danger" onclick="cancelTriggerOrder('${order.id}')" style="padding: 5px 10px; font-size: 0.8rem;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        container.append(orderElement);
+                    });
+                }
+            });
+        }
+        
+        function cancelTriggerOrder(orderId) {
+            $.ajax({
+                url: '/cancel_trigger_order',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ order_id: orderId }),
+                success: function(response) {
+                    if (response.success) {
+                        showNotification('Trigger order cancelled', 'success');
+                        loadPendingOrders();
+                    }
+                }
+            });
+        }
+        
+        // Trade History Functions with Tracking
+        function loadRecentTrades() {
+            $.get('/get_recent_trades', function(response) {
+                if (response.success) {
+                    displayRecentTrades(response.trades);
+                }
+            });
+        }
+        
+        function displayRecentTrades(trades) {
+            const container = $('#recent-trades');
+            container.empty();
+            
+            if (!trades || trades.length === 0) {
+                container.html('<div style="color: var(--secondary-text); text-align: center; padding: 20px;"><i class="fas fa-exchange-alt"></i> No trades yet</div>');
+                return;
+            }
+            
+            trades.forEach((trade, index) => {
+                // Check if this is an exit event
+                if (trade.order_type === 'index_exit') {
+                    const exitCard = `
+                        <div class="trade-card" style="border-left: 4px solid ${trade.exit_type === 'sl' ? '#ef4444' : trade.exit_type === 'target' ? '#10b981' : '#f59e0b'};">
+                            <div class="trade-header">
+                                <div class="trade-symbol">${trade.symbol}</div>
+                                <div class="trade-side" style="background: ${trade.exit_type === 'sl' ? 'rgba(239, 68, 68, 0.1)' : trade.exit_type === 'target' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; 
+                                    color: ${trade.exit_type === 'sl' ? '#ef4444' : trade.exit_type === 'target' ? '#10b981' : '#f59e0b'}; 
+                                    border: 1px solid ${trade.exit_type === 'sl' ? 'rgba(239, 68, 68, 0.2)' : trade.exit_type === 'target' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
+                                    ${trade.exit_type === 'sl' ? 'STOP LOSS' : trade.exit_type === 'target' ? 'TARGET HIT' : 'EXIT'}
+                                </div>
+                            </div>
+                            <div class="trade-details">
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Exit Price</span>
+                                    <span class="trade-detail-value">$${parseFloat(trade.price || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Reason</span>
+                                    <span class="trade-detail-value">${trade.exit_reason || 'Index Exit'}</span>
+                                </div>
+                            </div>
+                            <div class="trade-footer">
+                                <div class="trade-time">
+                                    <i class="far fa-clock"></i> ${new Date(trade.timestamp).toLocaleString('en-IN')}
+                                </div>
+                                <div class="trade-type">index_exit</div>
+                            </div>
+                        </div>
+                    `;
+                    container.append(exitCard);
+                } else {
+                    // Normal trade card
+                    const sideClass = trade.side === 'buy' ? 'side-buy' : 'side-sell';
+                    const sideText = trade.side === 'buy' ? 'BUY' : 'SELL';
+                    
+                    // Format date time
+                    const tradeTime = trade.date_time || trade.timestamp;
+                    const displayTime = new Date(tradeTime).toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    
+                    // Add "Track This Trade" button only for the most recent trade (index 0)
+                    const trackButton = index === 0 ? 
+                        `<button class="btn btn-primary" onclick="trackLatestTrade('${trade.symbol}', ${trade.price}, '${trade.side}', '${tradeTime}')" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-chart-line"></i> Track This Trade
+                        </button>` : '';
+                    
+                    const tradeCard = `
+                        <div class="trade-card">
+                            <div class="trade-header">
+                                <div class="trade-symbol">${trade.symbol}</div>
+                                <div class="trade-side ${sideClass}">${sideText}</div>
+                            </div>
+                            <div class="trade-details">
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Strike Price</span>
+                                    <span class="trade-detail-value">$${trade.strike_price || 'N/A'}</span>
+                                </div>
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Price</span>
+                                    <span class="trade-detail-value">$${parseFloat(trade.price || 0).toFixed(2)}</span>
+                                </div>
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Quantity</span>
+                                    <span class="trade-detail-value">${trade.size}</span>
+                                </div>
+                                <div class="trade-detail-item">
+                                    <span class="trade-detail-label">Total Cost</span>
+                                    <span class="trade-detail-value">$${parseFloat(trade.total_cost || 0).toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <div class="trade-footer">
+                                <div class="trade-time">
+                                    <i class="far fa-clock"></i> ${displayTime}
+                                </div>
+                                <div class="trade-type">${trade.order_type || 'instant'}</div>
+                            </div>
+                            ${trackButton}
+                        </div>
+                    `;
+                    container.append(tradeCard);
+                }
+            });
+        }
+        
+        // Schedule hourly trade tracking for a trade
+        function scheduleHourlyTradeTracking(trade) {
+            const tradeTime = new Date(trade.timestamp);
+            const now = new Date();
+            
+            // Calculate time until 1 hour after trade execution
+            const oneHourLater = new Date(tradeTime.getTime() + 3600000); // 1 hour in milliseconds
+            const timeUntilFirstUpdate = oneHourLater.getTime() - now.getTime();
+            
+            if (timeUntilFirstUpdate > 0) {
+                logMessage(`Scheduled hourly tracking for ${trade.symbol} at ${oneHourLater.toLocaleTimeString()}`, 'info');
+                
+                hourlyUpdateTimeout = setTimeout(function() {
+                    // Check if index-based exit is active before starting tracking
+                    $.get('/get_index_exit_params', function(response) {
+                        if (response.success) {
+                            const levels = response.levels;
+                            const isActive = (levels.above && levels.above.price) || (levels.below && levels.below.price);
+                            
+                            if (isActive && !isTrackingLatestTrade) {
+                                // Start tracking automatically
+                                trackLatestTrade(trade.symbol, trade.price, trade.side, trade.timestamp);
+                                showNotification('Auto-started hourly tracking (Index Exit Active)', 'info');
+                            } else if (!isActive) {
+                                logMessage('Hourly tracking skipped: Index Exit not active', 'warning');
+                            } else {
+                                logMessage('Hourly tracking skipped: Already tracking another trade', 'info');
+                            }
+                        }
+                    });
+                }, timeUntilFirstUpdate);
+            } else {
+                logMessage(`Trade ${trade.symbol} was executed more than 1 hour ago, skipping hourly tracking`, 'info');
+            }
+        }
+        
+        // Trade Tracking Functions
+        function trackLatestTrade(symbol, entryPrice, side, tradeTime) {
+            // Check if index-based exit is active
+            $.get('/get_index_exit_params', function(response) {
+                if (response.success) {
+                    const levels = response.levels;
+                    const isActive = (levels.above && levels.above.price) || (levels.below && levels.below.price);
+                    
+                    if (!isActive) {
+                        showNotification('Cannot track trade: Index-based exit is not active', 'error');
+                        logMessage(`Tracking failed for ${symbol}: Index Exit not active`, 'error');
+                        return;
+                    }
+                    
+                    // Store index exit params
+                    indexExitParams = levels;
+                    
+                    // Stop any existing tracking
+                    stopTrackingLatestTrade();
+                    
+                    // Set up new tracking with TRADE EXECUTION TIME
+                    trackedTradeData = {
+                        symbol: symbol,
+                        entryPrice: parseFloat(entryPrice),
+                        side: side,
+                        tradeTime: new Date(tradeTime),
+                        lastUpdate: new Date().toISOString(),
+                        hourlyUpdateCount: 0,
+                        currentPrice: parseFloat(entryPrice), // ✅ ADDED: Initial current price
+                        delta: null,
+                        tentativeSL: null,
+                        tentativeTarget: null,
+                        // ✅ ADDED: Store initial data for Telegram
+                        telegramData: {
+                            symbol: symbol,
+                            entryPrice: parseFloat(entryPrice),
+                            side: side,
+                            tradeTime: new Date(tradeTime),
+                            lastTelegramUpdate: null,
+                            updateCount: 0
+                        }
+                    };
+                    
+                    isTrackingLatestTrade = true;
+                    
+                    // Show tracking status IMMEDIATELY
+                    $('#tracking-status-container').show();
+                    
+                    // ✅ ADDED: Update UI with initial data
+                    updateTrackingDetails();
+                    
+                    // Start tracking intervals
+                    startTradeTracking();
+                    
+                    showNotification(`Started tracking ${symbol}`, 'success');
+                    logMessage(`Started tracking ${symbol} (Side: ${side}, Entry: $${entryPrice})`, 'info');
+                    
+                    // ✅ FIXED: Send initial Telegram update immediately
+                    sendHourlyTelegramUpdate(true);
+                } else {
+                    showNotification('Error checking index exit status', 'error');
+                }
+            });
+        }
+        
+        function startTradeTracking() {
+            // Clear any existing intervals
+            stopAllTracking();
+            
+            // Update price immediately
+            updateTrackedTradePrice();
+            
+            // Update price every 30 seconds
+            tradeTrackingInterval = setInterval(updateTrackedTradePrice, 30000);
+            
+            // ✅ ADDED: Update UI every 5 seconds for real-time updates
+            const uiUpdateInterval = setInterval(updateTrackingDetails, 5000);
+            
+            // ✅ ADDED: Store this interval for cleanup
+            trackedTradeData.uiUpdateInterval = uiUpdateInterval;
+            
+            // Calculate time until next EXACT hourly update based on TRADE TIME
+            scheduleNextHourlyUpdate();
+        }
+        
+        function scheduleNextHourlyUpdate() {
+            if (!trackedTradeData || !isTrackingLatestTrade) {
+                console.log(`[Schedule Debug] No active tracking, skipping schedule`);
+                return;
+            }
+            
+            const now = new Date();
+            const tradeTime = trackedTradeData.tradeTime;
+            
+            // Calculate next hourly mark (1 hour, 2 hours, 3 hours... after trade time)
+            const hoursSinceTrade = Math.floor((now - tradeTime) / (1000 * 60 * 60));
+            const nextHourlyUpdateTime = new Date(tradeTime.getTime() + (hoursSinceTrade + 1) * 60 * 60 * 1000);
+            
+            const timeUntilNextUpdate = nextHourlyUpdateTime - now;
+            
+            console.log(`[Schedule Debug] 
+                Now: ${now.toLocaleTimeString()}
+                Trade Time: ${tradeTime.toLocaleTimeString()}
+                Hours Since Trade: ${hoursSinceTrade}
+                Next Update Time: ${nextHourlyUpdateTime.toLocaleTimeString()}
+                Time Until Next Update: ${Math.floor(timeUntilNextUpdate/1000)} seconds
+            `);
+            
+            if (timeUntilNextUpdate > 0) {
+                console.log(`[Schedule Debug] Setting timeout for ${Math.floor(timeUntilNextUpdate/1000)} seconds`);
+                
+                // Clear any existing timeout
+                if (hourlyUpdateTimeout) {
+                    clearTimeout(hourlyUpdateTimeout);
+                    hourlyUpdateTimeout = null;
+                }
+                
+                hourlyUpdateTimeout = setTimeout(function() {
+                    console.log(`[Schedule Debug] Timeout fired! Sending Telegram update`);
+                    sendHourlyTelegramUpdate();
+                    scheduleNextHourlyUpdate(); // Schedule next one
+                }, timeUntilNextUpdate);
+            } else {
+                // If we missed an update, send it now and schedule next one
+                console.log(`[Schedule Debug] Missed update, sending now and rescheduling`);
+                sendHourlyTelegramUpdate();
+                
+                // Wait a bit and schedule next one
+                setTimeout(function() {
+                    scheduleNextHourlyUpdate();
+                }, 5000);
+            }
+        }
+        
+        function updateTrackedTradePrice() {
+            if (!trackedTradeData || !isTrackingLatestTrade) return;
+            
+            const symbol = trackedTradeData.symbol;
+            
+            $.ajax({
+                url: '/fetch_greeks',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ option_symbol: symbol }),
+                success: function(response) {
+                    if (response.success) {
+                        const currentPrice = parseFloat(response.mark_price);
+                        const delta = parseFloat(response.delta);
+                        const entryPrice = trackedTradeData.entryPrice;
+                        const side = trackedTradeData.side;
+                        
+                        // Calculate P/L based on trade side
+                        let change, profitPercent;
+                        if (side === 'buy') {
+                            change = currentPrice - entryPrice;
+                            profitPercent = ((change / entryPrice) * 100).toFixed(2);
+                        } else {
+                            change = entryPrice - currentPrice;
+                            profitPercent = ((change / entryPrice) * 100).toFixed(2);
+                        }
+                        
+                        trackedTradeData.currentPrice = currentPrice;
+                        trackedTradeData.delta = delta;
+                        trackedTradeData.lastUpdate = new Date().toISOString();
+                        
+                        // ✅ ADDED: Update UI with new data
+                        updateTrackingDetails();
+                        
+                    } else {
+                        console.log("Failed to fetch option data for tracking");
+                    }
+                },
+                error: function() {
+                    console.log("Error fetching option data for tracking");
+                }
+            });
+        }
+        
+        function updateTrackingDetails() {
+            if (!trackedTradeData || !isTrackingLatestTrade) {
+                $('#tracking-details').html('<div style="color: var(--secondary-text); padding: 20px; text-align: center;">No active tracking</div>');
+                return;
+            }
+            
+            const now = new Date();
+            const tradeTime = trackedTradeData.tradeTime;
+            
+            // Calculate hours since trade
+            const hoursSinceTrade = Math.floor((now - tradeTime) / (1000 * 60 * 60));
+            const minutesSinceTrade = Math.floor((now - tradeTime) / (1000 * 60)) % 60;
+            const secondsSinceTrade = Math.floor((now - tradeTime) / 1000) % 60;
+            
+            // Calculate next EXACT hourly update based on trade time
+            const nextHourlyUpdateTime = new Date(tradeTime.getTime() + (hoursSinceTrade + 1) * 60 * 60 * 1000);
+            const timeUntilNextUpdate = Math.floor((nextHourlyUpdateTime - now) / 1000); // in seconds
+            
+            const currentPrice = trackedTradeData.currentPrice || trackedTradeData.entryPrice;
+            const entryPrice = trackedTradeData.entryPrice;
+            const side = trackedTradeData.side;
+            
+            // Calculate P/L based on trade side
+            let change, profitPercent, profitAmount;
+            if (side === 'buy') {
+                change = currentPrice - entryPrice;
+                profitPercent = ((change / entryPrice) * 100);
+                profitAmount = change * 1000;
+            } else {
+                change = entryPrice - currentPrice;
+                profitPercent = ((change / entryPrice) * 100);
+                profitAmount = change * 1000;
+            }
+            
+            const profitClass = change >= 0 ? 'profit-positive' : 'profit-negative';
+            const profitSign = change >= 0 ? '+' : '';
+            
+            // ✅ ADDED: Telegram update info
+            const lastTelegramUpdate = trackedTradeData.telegramData?.lastTelegramUpdate 
+                ? new Date(trackedTradeData.telegramData.lastTelegramUpdate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+                : 'Not sent yet';
+            
+            const telegramCount = trackedTradeData.telegramData?.updateCount || 0;
+            
+            const details = `
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Symbol:</span>
+                    <span class="tracking-detail-value" style="font-weight: 700;">${trackedTradeData.symbol}</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Side:</span>
+                    <span class="tracking-detail-value" style="color: ${side === 'buy' ? 'var(--success-color)' : 'var(--danger-color)'}; font-weight: 600;">
+                        ${side.toUpperCase()}
+                    </span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Entry Price:</span>
+                    <span class="tracking-detail-value">$${entryPrice.toFixed(2)}</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Current Price:</span>
+                    <span class="tracking-detail-value">$${currentPrice.toFixed(2)}</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">P/L:</span>
+                    <span class="tracking-detail-value ${profitClass}" style="font-weight: 700;">
+                        ${profitSign}$${Math.abs(change).toFixed(2)} (${profitSign}${Math.abs(profitPercent).toFixed(2)}%)
+                    </span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Delta:</span>
+                    <span class="tracking-detail-value">${trackedTradeData.delta ? trackedTradeData.delta.toFixed(4) : 'Loading...'}</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Current BTC:</span>
+                    <span class="tracking-detail-value">$${currentBtcPrice.toFixed(2)}</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Time Since Trade:</span>
+                    <span class="tracking-detail-value">${hoursSinceTrade}h ${minutesSinceTrade}m ${secondsSinceTrade}s</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Next Update:</span>
+                    <span class="tracking-detail-value">${nextHourlyUpdateTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} (${Math.floor(timeUntilNextUpdate/60)}m ${timeUntilNextUpdate%60}s)</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Last Telegram:</span>
+                    <span class="tracking-detail-value">${lastTelegramUpdate} (${telegramCount} sent)</span>
+                </div>
+                <div class="tracking-detail-row">
+                    <span class="tracking-detail-label">Last Update:</span>
+                    <span class="tracking-detail-value">${new Date(trackedTradeData.lastUpdate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</span>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; border-left: 3px solid var(--accent-color); font-size: 0.85rem;">
+                    <i class="fas fa-info-circle"></i> Tracking active. Updates sent every hour via Telegram.
+                </div>
+            `;
+            
+            $('#tracking-details').html(details);
+        }
+        
+        function sendHourlyTelegramUpdate(isInitial = false) {
+            if (!trackedTradeData || !isTrackingLatestTrade) return;
+            
+            console.log(`[Telegram Debug] sendHourlyTelegramUpdate called, isInitial: ${isInitial}`);
+            
+            // Check if index-based exit is still active
+            $.get('/get_index_exit_params', function(response) {
+                console.log(`[Telegram Debug] Index exit params response:`, response);
+                
+                if (response.success) {
+                    const levels = response.levels;
+                    const isActive = (levels.above && levels.above.price) || (levels.below && levels.below.price);
+                    
+                    if (isActive) {
+                        const symbol = trackedTradeData.symbol;
+                        const entryPrice = trackedTradeData.entryPrice;
+                        const currentPrice = trackedTradeData.currentPrice || entryPrice;
+                        const side = trackedTradeData.side;
+                        const tradeTime = trackedTradeData.tradeTime;
+                        
+                        // Calculate P/L based on trade side
+                        let change, profitPercent;
+                        if (side === 'buy') {
+                            change = currentPrice - entryPrice;
+                            profitPercent = ((change / entryPrice) * 100).toFixed(2);
+                        } else {
+                            change = entryPrice - currentPrice;
+                            profitPercent = ((change / entryPrice) * 100).toFixed(2);
+                        }
+                        
+                        const profitSign = change >= 0 ? '+' : '';
+                        
+                        // Calculate hours since trade
+                        const now = new Date();
+                        const hoursSinceTrade = Math.floor((now - tradeTime) / (1000 * 60 * 60));
+                        
+                        const messageType = isInitial ? 'Initial' : `Hour ${hoursSinceTrade}`;
+                        
+                        // ✅ IMPROVED: Better formatted message
+                        const message = `🕐 <b>${messageType} Trade Update</b>\n\n` +
+                                       `<b>Symbol:</b> ${symbol}\n` +
+                                       `<b>Side:</b> ${side.toUpperCase()}\n` +
+                                       `<b>Entry Price:</b> $${entryPrice.toFixed(2)}\n` +
+                                       `<b>Entry Time:</b> ${tradeTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}\n` +
+                                       `<b>Current Price:</b> $${currentPrice.toFixed(2)}\n` +
+                                       `<b>P/L:</b> ${profitSign}$${Math.abs(change).toFixed(2)} (${profitSign}${Math.abs(profitPercent)}%)\n` +
+                                       `<b>Update Time:</b> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                        
+                        console.log(`[Telegram Debug] Sending message: ${message}`);
+                        
+                        // Send Telegram update
+                        $.ajax({
+                            url: '/send_trade_update',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                symbol: symbol,
+                                side: side,
+                                entry_price: entryPrice,
+                                current_price: currentPrice,
+                                change: change,
+                                change_percent: profitPercent,
+                                message: message,
+                                is_initial: isInitial,
+                                hours_since_trade: hoursSinceTrade
+                            }),
+                            success: function(response) {
+                                console.log(`[Telegram Debug] Server response:`, response);
+                                
+                                if (response.success) {
+                                    trackedTradeData.hourlyUpdateCount++;
+                                    trackedTradeData.lastHourlyUpdate = now.toISOString();
+                                    trackedTradeData.telegramData.lastTelegramUpdate = now.toISOString();
+                                    trackedTradeData.telegramData.updateCount++;
+                                    
+                                    logMessage(`${messageType} Telegram update sent for ${symbol}`, 'success');
+                                    console.log(`[Telegram Debug] Success: ${messageType} update sent`);
+                                } else {
+                                    logMessage(`Failed to send Telegram update: ${response.error}`, 'error');
+                                    console.error(`[Telegram Debug] Failed: ${response.error}`);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                logMessage(`Error sending Telegram update: ${error}`, 'error');
+                                console.error(`[Telegram Debug] AJAX error: ${error}`);
+                            }
+                        });
+                    } else {
+                        // Index-based exit is no longer active, stop tracking
+                        console.log(`[Telegram Debug] Index exit not active, stopping tracking`);
+                        stopTrackingLatestTrade();
+                        showNotification('Stopped tracking (Index Exit Inactive)', 'warning');
+                    }
+                } else {
+                    console.error(`[Telegram Debug] Failed to get index exit params`);
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error(`[Telegram Debug] Failed to fetch index exit params: ${textStatus}, ${errorThrown}`);
+            });
+        }
+        
+        function stopTrackingLatestTrade() {
+            isTrackingLatestTrade = false;
+            
+            // ✅ ADDED: Clear UI update interval
+            if (trackedTradeData && trackedTradeData.uiUpdateInterval) {
+                clearInterval(trackedTradeData.uiUpdateInterval);
+            }
+            
+            trackedTradeData = null;
+            
+            $('#tracking-status-container').hide();
+            stopAllTracking();
+            
+            showNotification('Stopped trade tracking', 'warning');
+            logMessage('Trade tracking stopped', 'info');
+        }
+        
+        function showArchiveModal(trades) {
+            let archiveContent = '';
+            
+            if (!trades || trades.length === 0) {
+                archiveContent = '<div style="text-align: center; padding: 40px; color: var(--secondary-text);"><i class="fas fa-exchange-alt"></i> No trades in archive</div>';
+            } else {
+                archiveContent = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="background: var(--hover-bg);">
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Time</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Symbol</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Side</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Strike</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Price</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Qty</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Total</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--secondary-text);">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                trades.forEach((trade, index) => {
+                    // Check for exit events
+                    if (trade.order_type === 'index_exit') {
+                        archiveContent += `
+                            <tr style="border-bottom: 1px solid var(--border-color); ${index % 2 === 0 ? 'background: white;' : 'background: var(--hover-bg);'}">
+                                <td style="padding: 12px;">${new Date(trade.timestamp).toLocaleString('en-IN')}</td>
+                                <td style="padding: 12px; font-weight: 600;">${trade.symbol}</td>
+                                <td style="padding: 12px;">
+                                    <span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; 
+                                          background: ${trade.exit_type === 'sl' ? 'rgba(239, 68, 68, 0.1)' : trade.exit_type === 'target' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; 
+                                          color: ${trade.exit_type === 'sl' ? '#ef4444' : trade.exit_type === 'target' ? '#10b981' : '#f59e0b'}; 
+                                          border: 1px solid ${trade.exit_type === 'sl' ? 'rgba(239, 68, 68, 0.2)' : trade.exit_type === 'target' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)'};">
+                                        ${trade.exit_type === 'sl' ? 'STOP LOSS' : trade.exit_type === 'target' ? 'TARGET' : 'EXIT'}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px;">-</td>
+                                <td style="padding: 12px;">$${parseFloat(trade.price || 0).toFixed(2)}</td>
+                                <td style="padding: 12px;">-</td>
+                                <td style="padding: 12px; font-weight: 600;">-</td>
+                                <td style="padding: 12px;">
+                                    <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: 600; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                        index_exit
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        // Normal trade
+                        const sideClass = trade.side === 'buy' ? 'side-buy' : 'side-sell';
+                        const sideText = trade.side === 'buy' ? 'BUY' : 'SELL';
+                        const tradeTime = new Date(trade.timestamp).toLocaleString('en-IN');
+                        
+                        archiveContent += `
+                            <tr style="border-bottom: 1px solid var(--border-color); ${index % 2 === 0 ? 'background: white;' : 'background: var(--hover-bg);'}">
+                                <td style="padding: 12px;">${tradeTime}</td>
+                                <td style="padding: 12px; font-weight: 600;">${trade.symbol}</td>
+                                <td style="padding: 12px;">
+                                    <span class="trade-side ${sideClass}" style="display: inline-block;">${sideText}</span>
+                                </td>
+                                <td style="padding: 12px;">$${trade.strike_price || 'N/A'}</td>
+                                <td style="padding: 12px;">$${parseFloat(trade.price || 0).toFixed(2)}</td>
+                                <td style="padding: 12px;">${trade.size}</td>
+                                <td style="padding: 12px; font-weight: 600;">$${parseFloat(trade.total_cost || 0).toFixed(2)}</td>
+                                <td style="padding: 12px;">
+                                    <span class="trade-type" style="display: inline-block;">${trade.order_type || 'instant'}</span>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+                
+                archiveContent += `
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            $('#archive-list').html(archiveContent);
+            $('#archive-overlay, #archive-modal').show();
+        }
+        
+        function closeArchiveModal() {
+            $('#archive-overlay, #archive-modal').hide();
+        }
+        
+        function clearTradeHistory() {
+            if (!confirm('Are you sure you want to clear ALL trade history? This cannot be undone.')) {
+                return;
+            }
+            
+            $.ajax({
+                url: '/clear_trade_history',
+                type: 'POST',
+                success: function(response) {
+                    if (response.success) {
+                        showNotification('Trade history cleared', 'success');
+                        closeArchiveModal();
+                        loadRecentTrades();
+                    }
+                }
+            });
+        }
+        
+        function exportTradesToCSV() {
+            $.get('/get_all_trades', function(response) {
+                if (response.success && response.trades.length > 0) {
+                    const trades = response.trades;
+                    let csv = 'Date Time,Symbol,Side,Strike Price,Price,Quantity,Total Cost,Order Type,Order ID,Exit Type,Exit Reason\n';
+                    
+                    trades.forEach(trade => {
+                        const tradeTime = new Date(trade.timestamp).toLocaleString('en-IN');
+                        const exitType = trade.exit_type || '';
+                        const exitReason = trade.exit_reason || '';
+                        csv += `"${tradeTime}","${trade.symbol}","${trade.side}","${trade.strike_price || ''}","${trade.price || 0}","${trade.size}","${trade.total_cost || 0}","${trade.order_type || 'instant'}","${trade.order_id || ''}","${exitType}","${exitReason}"\n`;
+                    });
+                    
+                    // Create download link
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `trades_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    
+                    showNotification('CSV exported successfully', 'success');
+                }
+            });
+        }
+        
+        // Utility Functions
+        function showNotification(message, type) {
+            const notification = $('#notification');
+            notification.text(message);
+            notification.css('border-left-color', 
+                type === 'success' ? '#10b981' : 
+                type === 'error' ? '#ef4444' : 
+                type === 'warning' ? '#f59e0b' : '#3b82f6'
+            );
+            notification.fadeIn(300);
+            setTimeout(() => notification.fadeOut(300), 3000);
+        }
+        
+        function logMessage(message, type = 'info') {
+            const log = $('#trade-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = $(`<div class="log-entry log-${type}">${timestamp} - ${message}</div>`);
+            log.append(entry);
+            log.scrollTop(log[0].scrollHeight);
+        }
+        
+        function clearLog() {
+            $('#trade-log').html('<div class="log-entry log-info">Log cleared...</div>');
+        }
+    </script>
+</body>
+</html>

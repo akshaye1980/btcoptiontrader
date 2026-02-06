@@ -1504,7 +1504,183 @@
                     checkExitCountdown();
                 }
             }, 500);
+            
+            // Check exit conditions for Telegram messages (FIXED)
+            setInterval(checkExitConditions, 5000);
         });
+        
+        // ============ FIXED FUNCTIONS ============
+        
+        // Function to check exit conditions and send Telegram messages
+        function checkExitConditions() {
+            $.get('/check_exit_conditions', function(response) {
+                if (response.success && response.exit_triggered) {
+                    // Telegram message will be sent by backend
+                    showNotification('Exit condition triggered! Telegram notification sent.', 'info');
+                }
+            });
+        }
+        
+        // Fixed calculateProjectedPNL function
+        function calculateProjectedPNL(option, quantity, side) {
+            if (!option || !option.greeks || !option.mark_price) {
+                return null;
+            }
+            
+            const currentOptionPrice = parseFloat(option.mark_price);
+            const delta = parseFloat(option.greeks.delta || 0);
+            const results = [];
+            
+            // Helper function to calculate option price at a target BTC price
+            function calculateOptionPriceAtBtcLevel(btcTargetPrice, delta, currentOptionPrice, currentBtcPrice) {
+                const btcPriceChange = btcTargetPrice - currentBtcPrice;
+                const optionPriceChange = btcPriceChange * delta;
+                return currentOptionPrice + optionPriceChange;
+            }
+            
+            // Check above level
+            if (indexExitParams.above && indexExitParams.above.price && indexExitParams.above.type) {
+                const btcTargetPrice = parseFloat(indexExitParams.above.price);
+                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
+                    btcTargetPrice, 
+                    delta, 
+                    currentOptionPrice, 
+                    currentBtcPrice
+                );
+                
+                // Calculate P&L based on trade side (buy or sell)
+                let pnl, pnlPercent;
+                if (side === 'buy') {
+                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
+                } else { // sell
+                    pnl = (currentOptionPrice - projectedOptionPrice) * quantity * 0.001;
+                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
+                }
+                
+                // Convert to USD if needed
+                const pnlUSD = pnl * BTC_TO_USD_RATE;
+                
+                results.push({
+                    level: 'above',
+                    type: indexExitParams.above.type, // 'sl' or 'target'
+                    btcPrice: btcTargetPrice,
+                    projectedOptionPrice: projectedOptionPrice,
+                    pnl: pnl,
+                    pnlUSD: pnlUSD,
+                    pnlPercent: pnlPercent,
+                    isProfit: (side === 'buy' && indexExitParams.above.type === 'target') || 
+                             (side === 'sell' && indexExitParams.above.type === 'sl'),
+                    delta: delta
+                });
+            }
+            
+            // Check below level
+            if (indexExitParams.below && indexExitParams.below.price && indexExitParams.below.type) {
+                const btcTargetPrice = parseFloat(indexExitParams.below.price);
+                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
+                    btcTargetPrice, 
+                    delta, 
+                    currentOptionPrice, 
+                    currentBtcPrice
+                );
+                
+                // Calculate P&L based on trade side (buy or sell)
+                let pnl, pnlPercent;
+                if (side === 'buy') {
+                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity;
+                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
+                } else { // sell
+                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity;
+                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
+                }
+                
+                // Convert to USD if needed
+                const pnlUSD = pnl * BTC_TO_USD_RATE;
+                
+                results.push({
+                    level: 'below',
+                    type: indexExitParams.below.type, // 'sl' or 'target'
+                    btcPrice: btcTargetPrice,
+                    projectedOptionPrice: projectedOptionPrice,
+                    pnl: pnl,
+                    pnlUSD: pnlUSD,
+                    pnlPercent: pnlPercent,
+                    isProfit: (side === 'buy' && indexExitParams.below.type === 'target') || 
+                             (side === 'sell' && indexExitParams.below.type === 'sl'),
+                    delta: delta
+                });
+            }
+            
+            return results;
+        }
+        
+        // Fixed generateProjectedPNLHTML function
+        function generateProjectedPNLHTML(pnlResults, side) {
+            if (!pnlResults || pnlResults.length === 0) {
+                return '';
+            }
+            
+            let html = `
+                <div class="projected-pnl">
+                    <div class="projected-pnl-header">
+                        <i class="fas fa-chart-line"></i>
+                        Projected P&L (Based on Index Exit Levels)
+                    </div>
+            `;
+            
+            pnlResults.forEach(result => {
+                const pnlClass = result.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+                const pnlSign = result.pnl >= 0 ? '+' : '';
+                const pnlPercentSign = result.pnlPercent >= 0 ? '+' : '';
+                
+                html += `
+                    <div class="projected-level ${result.type}">
+                        <span class="level-type ${result.type}">
+                            ${result.type === 'sl' ? 'STOP LOSS' : 'TARGET'}
+                            ${result.level === 'above' ? ' (Above)' : ' (Below)'}
+                        </span>
+                        <span style="font-weight: 600;">BTC: $${result.btcPrice.toFixed(2)}</span>
+                        
+                        <div class="projected-details">
+                            <div class="projected-row">
+                                <span class="projected-label">Option Price at Target:</span>
+                                <span class="projected-value">$${result.projectedOptionPrice.toFixed(2)}</span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">P&L (${side.toUpperCase()}):</span>
+                                <span class="projected-value ${pnlClass}">
+                                    ${pnlSign}$${Math.abs(result.pnl).toFixed(4)} BTC
+                                    (${pnlPercentSign}${Math.abs(result.pnlPercent).toFixed(2)}%)
+                                </span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">P&L in USD (approx):</span>
+                                <span class="projected-value ${pnlClass}">
+                                    ${pnlSign}$${Math.abs(result.pnlUSD).toFixed(2)}
+                                </span>
+                            </div>
+                            <div class="projected-row">
+                                <span class="projected-label">Expected Result:</span>
+                                <span class="projected-value" style="color: ${result.isProfit ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                    ${result.isProfit ? 'PROFIT 🟢' : 'LOSS 🔴'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary-text);">
+                    <i class="fas fa-info-circle"></i> Based on Delta: ${pnlResults[0]?.delta?.toFixed(4) || 'N/A'}, 
+                    Current BTC: $${currentBtcPrice.toFixed(2)}
+                </div>
+                </div>
+            `;
+            
+            return html;
+        }
         
         // ============ EXIT COUNTDOWN FUNCTIONS ============
 
@@ -1976,165 +2152,6 @@
                     }
                 }
             });
-        }
-        
-        // NEW FUNCTION: Calculate projected P&L for an option
-        function calculateProjectedPNL(option, quantity, side) {
-            if (!option || !option.greeks || !option.mark_price) {
-                return null;
-            }
-            
-            const currentOptionPrice = parseFloat(option.mark_price);
-            const delta = parseFloat(option.greeks.delta || 0);
-            const results = [];
-            
-            // Helper function to calculate option price at a target BTC price
-            function calculateOptionPriceAtBtcLevel(btcTargetPrice, delta, currentOptionPrice, currentBtcPrice) {
-                const btcPriceChange = btcTargetPrice - currentBtcPrice;
-                const optionPriceChange = btcPriceChange * delta;
-                return currentOptionPrice + optionPriceChange;
-            }
-            
-            // Check above level
-            if (indexExitParams.above && indexExitParams.above.price && indexExitParams.above.type) {
-                const btcTargetPrice = parseFloat(indexExitParams.above.price);
-                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
-                    btcTargetPrice, 
-                    delta, 
-                    currentOptionPrice, 
-                    currentBtcPrice
-                );
-                
-                // Calculate P&L based on trade side (buy or sell)
-                let pnl, pnlPercent;
-                if (side === 'buy') {
-                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity * 0.001;
-                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
-                } else { // sell
-                    pnl = (currentOptionPrice - projectedOptionPrice) * quantity * 0.001;
-                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
-                }
-                
-                // Convert to USD if needed
-                const pnlUSD = pnl * BTC_TO_USD_RATE;
-                
-                results.push({
-                    level: 'above',
-                    type: indexExitParams.above.type, // 'sl' or 'target'
-                    btcPrice: btcTargetPrice,
-                    projectedOptionPrice: projectedOptionPrice,
-                    pnl: pnl,
-                    pnlUSD: pnlUSD,
-                    pnlPercent: pnlPercent,
-                    isProfit: (side === 'buy' && indexExitParams.above.type === 'target') || 
-                             (side === 'sell' && indexExitParams.above.type === 'sl')
-                });
-            }
-            
-            // Check below level
-            if (indexExitParams.below && indexExitParams.below.price && indexExitParams.below.type) {
-                const btcTargetPrice = parseFloat(indexExitParams.below.price);
-                const projectedOptionPrice = calculateOptionPriceAtBtcLevel(
-                    btcTargetPrice, 
-                    delta, 
-                    currentOptionPrice, 
-                    currentBtcPrice
-                );
-                
-                // Calculate P&L based on trade side (buy or sell)
-                let pnl, pnlPercent;
-                if (side === 'buy') {
-                    pnl = (projectedOptionPrice - currentOptionPrice) * quantity * 0.001;
-                    pnlPercent = ((projectedOptionPrice - currentOptionPrice) / currentOptionPrice) * 100;
-                } else { // sell
-                    pnl = (currentOptionPrice - projectedOptionPrice) * quantity * 0.001;
-                    pnlPercent = ((currentOptionPrice - projectedOptionPrice) / currentOptionPrice) * 100;
-                }
-                
-                // Convert to USD if needed
-                const pnlUSD = pnl * BTC_TO_USD_RATE;
-                
-                results.push({
-                    level: 'below',
-                    type: indexExitParams.below.type, // 'sl' or 'target'
-                    btcPrice: btcTargetPrice,
-                    projectedOptionPrice: projectedOptionPrice,
-                    pnl: pnl,
-                    pnlUSD: pnlUSD,
-                    pnlPercent: pnlPercent,
-                    isProfit: (side === 'buy' && indexExitParams.below.type === 'target') || 
-                             (side === 'sell' && indexExitParams.below.type === 'sl')
-                });
-            }
-            
-            return results;
-        }
-        
-        // NEW FUNCTION: Generate HTML for projected P&L
-        function generateProjectedPNLHTML(pnlResults, side) {
-            if (!pnlResults || pnlResults.length === 0) {
-                return '';
-            }
-            
-            let html = `
-                <div class="projected-pnl">
-                    <div class="projected-pnl-header">
-                        <i class="fas fa-chart-line"></i>
-                        Projected P&L (Based on Index Exit Levels)
-                    </div>
-            `;
-            
-            pnlResults.forEach(result => {
-                const pnlClass = result.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
-                const pnlSign = result.pnl >= 0 ? '+' : '';
-                const pnlPercentSign = result.pnlPercent >= 0 ? '+' : '';
-                
-                html += `
-                    <div class="projected-level ${result.type}">
-                        <span class="level-type ${result.type}">
-                            ${result.type === 'sl' ? 'STOP LOSS' : 'TARGET'}
-                            ${result.level === 'above' ? ' (Above)' : ' (Below)'}
-                        </span>
-                        <span style="font-weight: 600;">BTC: $${result.btcPrice.toFixed(2)}</span>
-                        
-                        <div class="projected-details">
-                            <div class="projected-row">
-                                <span class="projected-label">Option Price at Target:</span>
-                                <span class="projected-value">$${result.projectedOptionPrice.toFixed(2)}</span>
-                            </div>
-                            <div class="projected-row">
-                                <span class="projected-label">P&L (${side.toUpperCase()}):</span>
-                                <span class="projected-value ${pnlClass}">
-                                    ${pnlSign}$${Math.abs(result.pnl).toFixed(4)} BTC
-                                    (${pnlPercentSign}${Math.abs(result.pnlPercent).toFixed(2)}%)
-                                </span>
-                            </div>
-                            <div class="projected-row">
-                                <span class="projected-label">P&L in USD (approx):</span>
-                                <span class="projected-value ${pnlClass}">
-                                    ${pnlSign}$${Math.abs(result.pnlUSD).toFixed(2)}
-                                </span>
-                            </div>
-                            <div class="projected-row">
-                                <span class="projected-label">Expected Result:</span>
-                                <span class="projected-value" style="color: ${result.isProfit ? 'var(--success-color)' : 'var(--danger-color)'};">
-                                    ${result.isProfit ? 'PROFIT 🟢' : 'LOSS 🔴'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `
-                <div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary-text);">
-                    <i class="fas fa-info-circle"></i> Based on Delta: ${pnlResults[0]?.delta?.toFixed(4) || 'N/A'}, 
-                    Current BTC: $${currentBtcPrice.toFixed(2)}
-                </div>
-                </div>
-            `;
-            
-            return html;
         }
         
         // Find & Trade Options - MODIFIED FUNCTION
@@ -3201,11 +3218,11 @@
             if (side === 'buy') {
                 change = currentPrice - entryPrice;
                 profitPercent = ((change / entryPrice) * 100);
-                profitAmount = change * 1000;
+                profitAmount = change * quantity;
             } else {
                 change = entryPrice - currentPrice;
                 profitPercent = ((change / entryPrice) * 100);
-                profitAmount = change * 1000;
+                profitAmount = change * quantity;
             }
             
             const profitClass = change >= 0 ? 'profit-positive' : 'profit-negative';

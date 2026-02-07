@@ -3569,6 +3569,57 @@
         function clearLog() {
             $('#trade-log').html('<div class="log-entry log-info">Log cleared...</div>');
         }
+        
     </script>
+
+    <!-- Auto Refresh Every 10 Minutes with Notification -->
+    <script>
+        // Auto refresh with notification
+        function autoRefreshPage() {
+            // Show notification 5 seconds before refresh
+            setTimeout(function() {
+                // Create notification
+                const notification = document.createElement('div');
+                notification.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #667eea;
+                        color: white;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        z-index: 10000;
+                        font-family: Arial, sans-serif;
+                        font-size: 14px;
+                    ">
+                        🔄 Refreshing page for latest data...
+                    </div>
+                `;
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(function() {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+                
+            }, 595000); // 5 seconds before refresh (10 minutes - 5 seconds)
+            
+            // Refresh page after 10 minutes
+            setTimeout(function() {
+                location.reload();
+            }, 600000); // 10 minutes
+        }
+        
+        // Start auto refresh when page loads
+        window.addEventListener('load', function() {
+            console.log("Page will auto-refresh every 10 minutes");
+            autoRefreshPage();
+        });
+    </script>
+
 </body>
 </html>
